@@ -210,7 +210,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
     let cacheDados = [];
-    let cacheFotos = {};
     let todosExpandidos = false;
 
     async function buscarItens() {
@@ -226,7 +225,7 @@
       loading.classList.remove("hidden");
 
       try {
-        const response = await fetch(`${API_URL}?user=${encodeURIComponent(input)}`, {
+        const response = await fetch(`${API_URL}?user=${encodeURIComponent(input)}&t=${Date.now()}`, {
           method: "GET",
           redirect: "follow"
         });
@@ -278,11 +277,6 @@
       document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
       document.getElementById("modalFoto").classList.remove("hidden");
 
-      if (cacheFotos[cegNome]) {
-        exibirImagensNoModal(cacheFotos[cegNome]);
-        return;
-      }
-
       conteudoDiv.innerHTML = `
         <div class="py-12 text-center">
           <div class="inline-block w-8 h-8 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-2"></div>
@@ -290,9 +284,9 @@
         </div>`;
 
       try {
-        const res = await fetch(`${API_URL}?action=fotos&ceg=${encodeURIComponent(cegNome)}`);
+        // O parâmetro t=Date.now() garante que o navegador busque sempre a pasta atualizada na hora!
+        const res = await fetch(`${API_URL}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
         const urls = await res.json();
-        cacheFotos[cegNome] = urls;
         exibirImagensNoModal(urls);
       } catch (e) {
         conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos. Verifique se atualizou a implantação do Apps Script!</p>`;
