@@ -1,1 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄 | Consulta de Claims</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #fff5f7 0%, #fdf8f5 50%, #f5f0ff 100%);
+      overflow-x: hidden;
+    }
+
+    /* Animação de entrada em cascata dos cards */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-anim {
+      animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+
+    /* Efeito de expansão suave ao passar o mouse ou focar */
+    .ceg-card {
+      transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .ceg-card:hover {
+      transform: translateY(-5px) scale(1.015);
+      box-shadow: 0 20px 35px -10px rgba(244, 114, 182, 0.18);
+      border-color: #f9a8d4;
+    }
+
+    /* Área expansível de detalhes */
+    .detalhes-expand {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, margin-top 0.35s ease, padding-top 0.35s ease;
+    }
+
+    .ceg-card:hover .detalhes-expand,
+    .ceg-card.aberto .detalhes-expand {
+      max-height: 600px;
+      opacity: 1;
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+    }
+
+    .ceg-card:hover .seta-indicador,
+    .ceg-card.aberto .seta-indicador {
+      transform: rotate(180deg);
+      color: #f43f5e;
+    }
+
+    /* Bolhas decorativas de fundo */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      z-index: -1;
+      opacity: 0.55;
+      animation: floatBlob 10s infinite alternate ease-in-out;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -30px) scale(1.1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-700 p-4 md:p-8 relative">
+
+  <!-- Decoração de Fundo -->
+  <div class="blob w-72 h-72 bg-rose-200 top-[-40px] left-[-40px]"></div>
+  <div class="blob w-80 h-80 bg-purple-200 bottom-[-50px] right-[-40px]" style="animation-delay: -5s;"></div>
+
+  <div class="max-w-3xl mx-auto">
+    <!-- Cabeçalho Interativo -->
+    <header class="text-center my-8">
+      <div class="inline-block bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-rose-100 text-xs font-bold text-rose-400 mb-3 shadow-sm">
+        🎀  Feito por @fbcrisimhere 🎀 
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-rose-400 mb-3 tracking-tight drop-shadow-sm transition hover:scale-105 duration-300 cursor-default">
+        ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
+      </h1>
+      <p class="text-slate-500 text-sm md:text-base max-w-lg mx-auto">
+        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGs. Passe o mouse (ou toque) nos cards para expandir os detalhes!
+      </p>
+    </header>
+
+    <!-- Barra de Pesquisa com Efeito Glassmorphism -->
+    <div class="bg-white/90 backdrop-blur-md p-3 md:p-4 rounded-3xl shadow-lg shadow-rose-100/50 border border-rose-100 flex gap-2 mb-6 transition focus-within:ring-4 focus-within:ring-rose-200/60 focus-within:border-rose-300">
+      <div class="relative w-full flex items-center">
+        <span class="absolute left-4 text-rose-300 text-lg">🔍</span>
+        <input 
+          type="text" 
+          id="userInput" 
+          placeholder="Ex: @seu_user" 
+          class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 focus:bg-white focus:outline-none text-slate-700 font-semibold placeholder:font-normal"
+          onkeypress="if(event.key === 'Enter') buscarItens()"
+        >
+      </div>
+      <button 
+        onclick="buscarItens()" 
+        class="bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 active:scale-95 text-white font-bold px-7 py-3.5 rounded-2xl transition-all duration-200 shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-300 cursor-pointer shrink-0">
+        Buscar
+      </button>
+    </div>
+
+    <!-- Estado de Carregamento -->
+    <div id="loading" class="hidden text-center py-12">
+      <div class="inline-block w-10 h-10 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-3"></div>
+      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens em todas as abas... 💌</p>
+    </div>
+
+    <!-- Painel de Resumo e Filtros (Aparece após a busca) -->
+    <div id="painelResumo" class="hidden mb-6 space-y-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-rose-100 text-center shadow-sm hover:scale-105 transition">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de CEGs</p>
+          <p id="statTotalCegs" class="text-2xl font-bold text-rose-400 mt-0.5">0</p>
+        </div>
+        <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-emerald-100 text-center shadow-sm hover:scale-105 transition">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Quitadas</p>
+          <p id="statQuitadas" class="text-2xl font-bold text-emerald-500 mt-0.5">0</p>
+        </div>
+        <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-100 text-center shadow-sm hover:scale-105 transition">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pendentes</p>
+          <p id="statPendentes" class="text-2xl font-bold text-amber-500 mt-0.5">0</p>
+        </div>
+      </div>
+
+      <!-- Botões de Filtro Rápido -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-2xl border border-rose-100">
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            Todas
+          </button>
+          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            ⏳ A Pagar
+          </button>
+          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            📦 Na GOM
+          </button>
+          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            💚 Enviados
+          </button>
+        </div>
+        <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">
+          ↕ Expandir todos
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Cards de Resultados -->
+    <div id="resultados" class="space-y-4"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
+    let cacheDados = [];
+    let todosExpandidos = false;
+
+    async function buscarItens() {
+      const input = document.getElementById("userInput").value.trim();
+      const resultadosDiv = document.getElementById("resultados");
+      const loading = document.getElementById("loading");
+      const painelResumo = document.getElementById("painelResumo");
+
+      if (!input) return;
+
+      resultadosDiv.innerHTML = "";
+      painelResumo.classList.add("hidden");
+      loading.classList.remove("hidden");
+
+      try {
+        const response = await fetch(`APIURL?user={encodeURIComponent(input)}`, {
+          method: "GET",
+          redirect: "follow"
+        });
+        
+        const dados = await response.json();
+        cacheDados = dados;
+        loading.classList.add("hidden");
+
+        if (dados.length === 0) {
+          resultadosDiv.innerHTML = `
+            <div class="bg-white/90 p-8 rounded-3xl text-center border border-rose-100 text-slate-500 shadow-sm card-anim">
+              <p class="text-3xl mb-2">🥺</p>
+              Nenhum item encontrado para <strong>${input}</strong>.<br>
+              <span class="text-xs text-slate-400">Verifique se digitou seu @ exatamente como está na planilha!</span>
+            </div>`;
+          return;
+        }
+
+        // Atualiza contadores do resumo
+        const total = dados.length;
+        const quitadas = dados.filter(i => i.resumoPago === "Pago").length;
+        const pendentes = total - quitadas;
+
+        document.getElementById("statTotalCegs").textContent = total;
+        document.getElementById("statQuitadas").textContent = quitadas;
+        document.getElementById("statPendentes").textContent = pendentes;
+        painelResumo.classList.remove("hidden");
+
+        renderizarCards(dados);
+      } catch (erro) {
+        console.error(erro);
+        loading.classList.add("hidden");
+        resultadosDiv.innerHTML = `
+          <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center border border-red-100">
+            Erro ao conectar com a planilha. Verifique se publicou uma "Nova versão" em Gerenciar implantações.
+          </div>`;
+      }
+    }
+
+    function filtrarResultados(filtro) {
+      document.querySelectorAll(".filtro-btn").forEach(btn => {
+        btn.className = "filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition";
+      });
+      document.getElementById(`btn-${filtro}`).className = "filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition shadow-sm";
+
+      let filtrados = cacheDados;
+      if (filtro === "pendentes") {
+        filtrados = cacheDados.filter(i => i.resumoPago !== "Pago");
+      } else if (filtro === "nagom") {
+        filtrados = cacheDados.filter(i => i.statusEnvio === "solicitar" || i.statusEnvio === "solicitado");
+      } else if (filtro === "recebidos") {
+        filtrados = cacheDados.filter(i => i.statusEnvio === "recebido");
+      }
+
+      renderizarCards(filtrados);
+    }
+
+    function alternarTodosCards() {
+      todosExpandidos = !todosExpandidos;
+      const cards = document.querySelectorAll(".ceg-card");
+      cards.forEach(card => {
+        if (todosExpandidos) card.classList.add("aberto");
+        else card.classList.remove("aberto");
+      });
+      document.getElementById("btnExpandirTodos").textContent = todosExpandidos ? "↕ Recolher todos" : "↕ Expandir todos";
+    }
+
+    function renderizarCards(lista) {
+      const resultadosDiv = document.getElementById("resultados");
+      resultadosDiv.innerHTML = "";
+
+      if (lista.length === 0) {
+        resultadosDiv.innerHTML = `
+          <div class="bg-white/80 p-6 rounded-2xl text-center border border-rose-100 text-slate-400 text-sm">
+            Nenhuma CEG encontrada neste filtro. ✨
+          </div>`;
+        return;
+      }
+
+      lista.forEach((item, index) => {
+        const isTudoPago = item.resumoPago === "Pago";
+        const badgeGeral = isTudoPago 
+          ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`
+          : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
+
+        // Tag rápida de envio visível mesmo com o card fechado
+        let miniBadgeEnvio = "";
+        if (item.statusEnvio === "recebido") {
+          miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Enviado</span>`;
+        } else if (item.statusEnvio === "solicitado") {
+          miniBadgeEnvio = `<span class="bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💛 Envio Solicitado</span>`;
+        } else if (item.statusEnvio === "solicitar") {
+          miniBadgeEnvio = `<span class="bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce">🚨 Solicitar Envio!</span>`;
+        }
+
+        // Banner completo de status do Envio dentro da área expandida
+        let bannerEnvioHTML = "";
+        if (item.statusEnvio === "recebido") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-emerald-50/90 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💚</span>
+              <span><strong>Itens enviados!</strong> Confira o código de rastreio na planilha da GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitado") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-amber-50/90 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💛</span>
+              <span><strong>Envio já solicitado!</strong> Sua solicitação de envio já foi encaminhada para a GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitar") {
+          const limiteTexto = item.prazoEnvio ? `até a data limite (<strong>${item.prazoEnvio}</strong>)` : `até a data limite`;
+          const chegadaTexto = item.dataChegada ? ` (chegou em ${item.dataChegada})` : "";
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">🚨</span>
+              <span><strong>A CEG chegou na GOM${chegadaTexto}!</strong> Solicitar envio ${limiteTexto}.</span>
+            </div>`;
+        }
+
+        // Monta os bloquinhos de cada prazo/parcela/frete
+        let parcelasHTML = "";
+        if (item.parcelas && item.parcelas.length > 0) {
+          parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
+          item.parcelas.forEach(p => {
+            const corParcela = p.pago 
+              ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60" 
+              : "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60";
+            const iconeParcela = p.pago ? "✓ Pago" : "⏳ A pagar";
+            
+            const labelTopo = String(p.titulo).toLowerCase().includes("frete") 
+              ? `🚚 Frete` 
+              : `📅 Prazo: ${p.prazo}`;
+
+            parcelasHTML += `
+              <div class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
+                <span class="text-xs font-semibold opacity-75">${labelTopo}</span>
+                <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1.5 gap-2">
+                  <span class="font-bold text-sm">${p.valor}</span>
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 shadow-2xs">${iconeParcela}</span>
+                </div>
+              </div>
+            `;
+          });
+          parcelasHTML += `</div>`;
+        }
+
+        const delayAnim = Math.min(index * 0.06, 0.5);
+
+        resultadosDiv.innerHTML += `
+          <div 
+            onclick="this.classList.toggle('aberto')" 
+            style="animation-delay: ${delayAnim}s"
+            class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 cursor-pointer select-none">
+            
+            <!-- Topo sempre visível do Card -->
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+                    ${item.ceg}
+                  </span>
+                  ${miniBadgeEnvio}
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
+                  <span>🏷️  Itens: ${item.item}</span>
+                </h3>
+              </div>
+
+              <div class="flex md:flex-col items-center md:items-end justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  ${badgeGeral}
+                  <span class="seta-indicador text-slate-400 text-xs transition-transform duration-300 bg-slate-50 w-6 h-6 flex items-center justify-center rounded-full border border-slate-100">
+                    ▼
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500">📦 <strong>Status:</strong> ${item.statusCeg}</p>
+              </div>
+            </div>
+
+            <!-- Área Expansível (Abre ao passar o mouse ou clicar) -->
+            <div class="detalhes-expand border-t border-rose-50">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-3">
+                <span>👤 Joiner: <strong>${item.user}</strong></span>
+                <span>✨ Detalhes de pagamento & envio</span>
+              </div>
+              ${bannerEnvioHTML}
+              ${parcelasHTML}
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
+
+
 
