@@ -188,7 +188,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE FOTO DO SET (GALERIA AUTOMÁTICA DO DRIVE) -->
+  <!-- MODAL DE FOTO DO SET -->
   <div id="modalFoto" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
       <button onclick="fecharModalFoto()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
@@ -197,9 +197,7 @@
         <span>📸</span> Fotos do Set
       </h3>
 
-      <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-3 bg-rose-50/30 rounded-2xl border border-rose-100/60">
-        <!-- Imagens puxadas automaticamente do Drive entram aqui -->
-      </div>
+      <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-3 bg-rose-50/30 rounded-2xl border border-rose-100/60"></div>
 
       <button onclick="fecharModalFoto()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shadow-sm">
         Fechar
@@ -284,7 +282,6 @@
         </div>`;
 
       try {
-        // O parâmetro t=Date.now() garante que o navegador busque sempre a pasta atualizada na hora!
         const res = await fetch(`${API_URL}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
         const urls = await res.json();
         exibirImagensNoModal(urls);
@@ -364,9 +361,16 @@
 
       lista.forEach((item, index) => {
         const isTudoPago = item.resumoPago === "Pago";
-        const badgeGeral = isTudoPago 
-          ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`
-          : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
+        const temVencida = item.parcelas.some(p => p.vencida && !p.pago);
+
+        let badgeGeral = "";
+        if (isTudoPago) {
+          badgeGeral = `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`;
+        } else if (temVencida) {
+          badgeGeral = `<span class="bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⚠️ Multa Acionada</span>`;
+        } else {
+          badgeGeral = `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
+        }
 
         let miniBadgeEnvio = "";
         if (item.statusEnvio === "recebido") {
@@ -404,16 +408,26 @@
         if (item.parcelas && item.parcelas.length > 0) {
           parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
           item.parcelas.forEach(p => {
-            const corParcela = p.pago 
-              ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60" 
-              : "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60 cursor-pointer hover:shadow-md hover:border-amber-300";
-            const iconeParcela = p.pago ? "✓ Pago" : "⏳ A pagar";
+            let corParcela = "";
+            let iconeParcela = "";
+            let acionadorClick = "";
+
+            if (p.pago) {
+              corParcela = "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60";
+              iconeParcela = "✓ Pago";
+            } else if (p.vencida) {
+              corParcela = "bg-rose-50/90 border-rose-300 text-rose-900 hover:bg-rose-100/70 cursor-pointer hover:shadow-md hover:border-rose-400";
+              iconeParcela = "⚠️ Multa acionada";
+              acionadorClick = `onclick="abrirModalPagamento()" title="Prazo vencido! Clique para ver dados de pagamento"`;
+            } else {
+              corParcela = "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60 cursor-pointer hover:shadow-md hover:border-amber-300";
+              iconeParcela = "⏳ A pagar";
+              acionadorClick = `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
+            }
             
             const labelTopo = String(p.titulo).toLowerCase().includes("frete") 
               ? `🚚 Frete` 
               : `📅 Prazo: ${p.prazo}`;
-
-            const acionadorClick = p.pago ? "" : `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
 
             parcelasHTML += `
               <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
@@ -431,9 +445,7 @@
         const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
 
         resultadosDiv.innerHTML += `
-          <div 
-            class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 select-none">
-            
+          <div class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 select-none">
             <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
               <div>
                 <div class="flex flex-wrap items-center gap-2">
