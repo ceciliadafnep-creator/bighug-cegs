@@ -178,17 +178,17 @@
     </div>
   </div>
 
-  <!-- MODAL DE FOTO DO SET (GALERIA) -->
-  <div id="modalFoto" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
+  <!-- MODAL DE FOTO DO SET (GALERIA AUTOMÁTICA DO DRIVE) -->
+  <div id="modalFoto" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
       <button onclick="fecharModalFoto()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
-      <h3 id="tituloModalFoto" class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-center gap-2">
-        <span>📸</span> Foto do Set
+      <h3 id="tituloModalFoto" class="text-lg font-bold text-slate-800 mb-3 flex items-center justify-center gap-2 pr-6">
+        <span>📸</span> Fotos do Set
       </h3>
 
-      <div id="conteudoFotoModal" class="mb-4 max-h-[65vh] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 p-2">
-        <!-- Imagens injetadas via JS -->
+      <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-2 bg-rose-50/30 rounded-2xl border border-rose-100/60">
+        <!-- Imagens puxadas automaticamente do Drive entram aqui -->
       </div>
 
       <button onclick="fecharModalFoto()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shadow-sm">
@@ -199,36 +199,8 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
-    
-    // Dicionário com os links das fotos de cada CEG
-    const fotosSets = {
-      "Festinha do Hanji 🐿️🎂": [
-        "https://i.ibb.co/b5PxQcc6/foto1.jpg",
-        "https://ibb.co/b5PxQcc6",
-        "https://ibb.co/DPDjWPxT",
-        "https://ibb.co/hJVpPy4C",
-        "https://ibb.co/WXGy6KC"
-      ],
-      "Academia do lobão pt.2": [],
-      "Bochechinhas do Hannie": [],
-      "Chan \"Preparatus?\"": [],
-      "Chan´s Room 🐺": [],
-      "Chanlix": [],
-      "CHANtagem Emocional": [],
-      "Cosmo e Wanda & outros": [],
-      "Dormitório Jeongchan": [],
-      "Hyunlix meus pais": [],
-      "Innie segunda chance": [],
-      "Irmãos": [],
-      "Lobo-chan": [],
-      "Mercadinho de banana": [],
-      "Rolling stones - Stray kids": [],
-      "Seung de montão": [],
-      "Straight kids": [],
-      "Vila Sésamo": []
-    };
-
     let cacheDados = [];
+    let cacheFotos = {}; // Guarda as fotos já carregadas para abrir instantaneamente na 2ª vez
     let todosExpandidos = false;
 
     async function buscarItens() {
@@ -291,28 +263,51 @@
       document.getElementById("modalPagamento").classList.add("hidden");
     }
 
-    function abrirModalFoto(cegNome) {
+    async function abrirModalFoto(cegNome) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> Fotos do Set: ${cegNome}`;
-      
-      let listaLinks = [];
-      for (const [key, value] of Object.entries(fotosSets)) {
-        if (key.trim().toLowerCase() === cegNome.trim().toLowerCase()) {
-          listaLinks = value;
-          break;
-        }
+      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
+      document.getElementById("modalFoto").classList.remove("hidden");
+
+      // Se já buscou as fotos dessa CEG antes, mostra na hora
+      if (cacheFotos[cegNome]) {
+        exibirImagensNoModal(cacheFotos[cegNome]);
+        return;
       }
 
-      if (!listaLinks || listaLinks.length === 0) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-6 col-span-full">Nenhuma foto cadastrada para este set ainda. ✨</p>`;
-      } else {
-        let htmlImagens = "";
-        listaLinks.forEach(link => {
-          htmlImagens += `<a href="${link}" target="_blank" class="block border border-rose-100 rounded-2xl overflow-hidden shadow-xs hover:scale-102 transition"><img src="${link}" class="w-full h-48 object-cover" alt="Foto do Set"></a>`;
-        });
-        conteudoDiv.innerHTML = htmlImagens;
+      conteudoDiv.innerHTML = `
+        <div class="py-12 text-center">
+          <div class="inline-block w-8 h-8 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-2"></div>
+          <p class="text-xs text-rose-400 font-bold animate-pulse">Carregando fotos do Drive... ✨</p>
+        </div>`;
+
+      try {
+        const res = await fetch(`${API_URL}?action=fotos&ceg=${encodeURIComponent(cegNome)}`);
+        const urls = await res.json();
+        cacheFotos[cegNome] = urls;
+        exibirImagensNoModal(urls);
+      } catch (e) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos. Verifique se atualizou a implantação do Apps Script!</p>`;
       }
-      document.getElementById("modalFoto").classList.remove("hidden");
+    }
+
+    function exibirImagensNoModal(urls) {
+      const conteudoDiv = document.getElementById("conteudoFotoModal");
+      if (!urls || urls.length === 0) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada na pasta desta CEG no Drive. ✨</p>`;
+        return;
+      }
+
+      let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Dica: Toque na imagem para abrir em tela cheia e dar zoom!</p>`;
+      urls.forEach((url, i) => {
+        html += `
+          <div class="bg-white p-2 rounded-2xl border border-rose-100 shadow-xs">
+            <p class="text-[11px] font-bold text-rose-400 mb-1.5 text-left px-1">Foto ${i + 1} de ${urls.length}</p>
+            <a href="${url}" target="_blank" title="Clique para dar zoom">
+              <img src="${url}" class="w-full h-auto max-h-[55vh] object-contain mx-auto rounded-xl" alt="Foto do Set ${i + 1}" loading="lazy">
+            </a>
+          </div>`;
+      });
+      conteudoDiv.innerHTML = html;
     }
 
     function fecharModalFoto() {
@@ -431,7 +426,6 @@
           parcelasHTML += `</div>`;
         }
 
-        const delayAnim = Math.min(index * 0.06, 0.5);
         const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
 
         resultadosDiv.innerHTML += `
