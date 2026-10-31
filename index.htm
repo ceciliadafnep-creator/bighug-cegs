@@ -13,9 +13,16 @@
       overflow-x: hidden;
     }
 
+    /* Animação de entrada em cascata dos cards */
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .card-anim {
@@ -23,6 +30,7 @@
       opacity: 0;
     }
 
+    /* Efeito de expansão suave ao passar o mouse ou focar */
     .ceg-card {
       transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -33,6 +41,7 @@
       border-color: #f9a8d4;
     }
 
+    /* Área expansível de detalhes */
     .detalhes-expand {
       max-height: 0;
       opacity: 0;
@@ -54,6 +63,7 @@
       color: #f43f5e;
     }
 
+    /* Bolhas decorativas de fundo */
     .blob {
       position: fixed;
       border-radius: 50%;
@@ -71,10 +81,12 @@
 </head>
 <body class="min-h-screen text-slate-700 p-4 md:p-8 relative">
 
+  <!-- Decoração de Fundo -->
   <div class="blob w-72 h-72 bg-rose-200 top-[-40px] left-[-40px]"></div>
   <div class="blob w-80 h-80 bg-purple-200 bottom-[-50px] right-[-40px]" style="animation-delay: -5s;"></div>
 
   <div class="max-w-3xl mx-auto">
+    <!-- Cabeçalho Interativo -->
     <header class="text-center my-8">
       <div class="inline-block bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-rose-100 text-xs font-bold text-rose-400 mb-3 shadow-sm">
         🎀 Feito por @fbcrisimhere 🎀 
@@ -87,6 +99,7 @@
       </p>
     </header>
 
+    <!-- Barra de Pesquisa com Efeito Glassmorphism -->
     <div class="bg-white/90 backdrop-blur-md p-3 md:p-4 rounded-3xl shadow-lg shadow-rose-100/50 border border-rose-100 flex gap-2 mb-6 transition focus-within:ring-4 focus-within:ring-rose-200/60 focus-within:border-rose-300">
       <div class="relative w-full flex items-center">
         <span class="absolute left-4 text-rose-300 text-lg">🔍</span>
@@ -95,20 +108,23 @@
           id="userInput" 
           placeholder="Ex: @seu_user" 
           class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 focus:bg-white focus:outline-none text-slate-700 font-semibold placeholder:font-normal"
+          onkeypress="if(event.key === 'Enter') buscarItens()"
         >
       </div>
       <button 
-        id="btnBuscar" 
+        onclick="buscarItens()" 
         class="bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 active:scale-95 text-white font-bold px-7 py-3.5 rounded-2xl transition-all duration-200 shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-300 cursor-pointer shrink-0">
         Buscar
       </button>
     </div>
 
+    <!-- Estado de Carregamento -->
     <div id="loading" class="hidden text-center py-12">
       <div class="inline-block w-10 h-10 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-3"></div>
-      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens nas planilhas nacionais e internacionais... 💌</p>
+      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens em todas as abas... 💌</p>
     </div>
 
+    <!-- Painel de Resumo e Filtros (Aparece após a busca) -->
     <div id="painelResumo" class="hidden mb-6 space-y-4">
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-rose-100 text-center shadow-sm hover:scale-105 transition">
@@ -125,34 +141,36 @@
         </div>
       </div>
 
+      <!-- Botões de Filtro Rápido -->
       <div class="flex flex-wrap items-center justify-between gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-2xl border border-rose-100">
         <div class="flex flex-wrap gap-1.5">
-          <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">Todas</button>
-          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">⏳ A Pagar</button>
-          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">📦 Na GOM</button>
-          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">💚 Enviados</button>
+          <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            Todas
+          </button>
+          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            ⏳ A Pagar
+          </button>
+          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            📦 Na GOM
+          </button>
+          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
+            💚 Enviados
+          </button>
         </div>
-        <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">↕ Expandir todos</button>
+        <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">
+          ↕ Expandir todos
+        </button>
       </div>
     </div>
 
+    <!-- Lista de Cards de Resultados -->
     <div id="resultados" class="space-y-4"></div>
   </div>
 
   <script>
-    const API_NACIONAL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
-    const API_INTER = "https://script.google.com/macros/s/AKfycbxyMcxTzFg4lLkCslPWmY-RgxYlK_sSBd7XiOCkcL0guwcBVEZBtY9_XV1zRPJmSpG4/exec";
-    
+    const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
     let cacheDados = [];
     let todosExpandidos = false;
-
-    // Vincula os eventos diretamente via JS para evitar erros de onclick no navegador
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("btnBuscar").addEventListener("click", buscarItens);
-      document.getElementById("userInput").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") buscarItens();
-      });
-    });
 
     async function buscarItens() {
       const input = document.getElementById("userInput").value.trim();
@@ -167,12 +185,12 @@
       loading.classList.remove("hidden");
 
       try {
-        const [resNacional, resInter] = await Promise.all([
-          fetch(`${API_NACIONAL}?user=${encodeURIComponent(input)}`, { method: "GET", redirect: "follow" }).then(r => r.json()).catch(() => []),
-          fetch(`${API_INTER}?user=${encodeURIComponent(input)}`, { method: "GET", redirect: "follow" }).then(r => r.json()).catch(() => [])
-        ]);
-
-        const dados = [...resNacional, ...resInter];
+        const response = await fetch(`${API_URL}?user=${encodeURIComponent(input)}`, {
+          method: "GET",
+          redirect: "follow"
+        });
+        
+        const dados = await response.json();
         cacheDados = dados;
         loading.classList.add("hidden");
 
@@ -181,11 +199,12 @@
             <div class="bg-white/90 p-8 rounded-3xl text-center border border-rose-100 text-slate-500 shadow-sm card-anim">
               <p class="text-3xl mb-2">🥺</p>
               Nenhum item encontrado para <strong>${input}</strong>.<br>
-              <span class="text-xs text-slate-400">Verifique se digitou seu @ exatamente como está nas planilhas!</span>
+              <span class="text-xs text-slate-400">Verifique se digitou seu @ exatamente como está na planilha!</span>
             </div>`;
           return;
         }
 
+        // Atualiza contadores do resumo
         const total = dados.length;
         const quitadas = dados.filter(i => i.resumoPago === "Pago").length;
         const pendentes = total - quitadas;
@@ -201,7 +220,7 @@
         loading.classList.add("hidden");
         resultadosDiv.innerHTML = `
           <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-center border border-red-100">
-            Erro ao conectar com as planilhas. Verifique se publicou as novas versões nos Apps Scripts.
+            Erro ao conectar com a planilha. Verifique se publicou uma "Nova versão" em Gerenciar implantações.
           </div>`;
       }
     }
