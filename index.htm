@@ -33,6 +33,16 @@
       border-color: #f9a8d4;
     }
 
+    .foto-card {
+      transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .foto-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 18px 30px -10px rgba(244, 114, 182, 0.25);
+      border-color: #f9a8d4;
+    }
+
     .detalhes-expand {
       max-height: 0;
       opacity: 0;
@@ -187,7 +197,7 @@
         <span>📸</span> Fotos do Set
       </h3>
 
-      <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-2 bg-rose-50/30 rounded-2xl border border-rose-100/60">
+      <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-3 bg-rose-50/30 rounded-2xl border border-rose-100/60">
         <!-- Imagens puxadas automaticamente do Drive entram aqui -->
       </div>
 
@@ -200,7 +210,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
     let cacheDados = [];
-    let cacheFotos = {}; // Guarda as fotos já carregadas para abrir instantaneamente na 2ª vez
+    let cacheFotos = {};
     let todosExpandidos = false;
 
     async function buscarItens() {
@@ -268,7 +278,6 @@
       document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
       document.getElementById("modalFoto").classList.remove("hidden");
 
-      // Se já buscou as fotos dessa CEG antes, mostra na hora
       if (cacheFotos[cegNome]) {
         exibirImagensNoModal(cacheFotos[cegNome]);
         return;
@@ -300,10 +309,9 @@
       let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Dica: Toque na imagem para abrir em tela cheia e dar zoom!</p>`;
       urls.forEach((url, i) => {
         html += `
-          <div class="bg-white p-2 rounded-2xl border border-rose-100 shadow-xs">
-            <p class="text-[11px] font-bold text-rose-400 mb-1.5 text-left px-1">Foto ${i + 1} de ${urls.length}</p>
-            <a href="${url}" target="_blank" title="Clique para dar zoom">
-              <img src="${url}" class="w-full h-auto max-h-[55vh] object-contain mx-auto rounded-xl" alt="Foto do Set ${i + 1}" loading="lazy">
+          <div class="foto-card bg-white p-3 rounded-2xl border border-rose-100 shadow-xs cursor-pointer">
+            <a href="${url}" target="_blank" title="Clique para abrir e dar zoom">
+              <img src="${url}" class="w-full h-auto max-h-[58vh] object-contain mx-auto rounded-xl" alt="Foto do Set ${i + 1}" loading="lazy">
             </a>
           </div>`;
       });
