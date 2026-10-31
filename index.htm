@@ -24,7 +24,7 @@
       <input 
         type="text" 
         id="userInput" 
-        placeholder="Ex: @seu_user" 
+        placeholder="Ex: fbcrisimhere" 
         class="w-full px-4 py-3 rounded-xl bg-rose-50/50 border border-rose-200 focus:outline-none focus:border-rose-400"
         onkeypress="if(event.key === 'Enter') buscarItens()"
       >
@@ -75,25 +75,48 @@
         }
 
         dados.forEach(item => {
-          const isPago = String(item.pago).toLowerCase().includes("pago");
-          const badgePago = isPago 
-            ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">✓ ${item.pago}</span>`
-            : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">⏳ ${item.pago || 'Pendente'}</span>`;
+          const isTudoPago = item.resumoPago === "Pago";
+          const badgeGeral = isTudoPago 
+            ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">✓ Tudo Pago</span>`
+            : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">⏳ Pagamento Pendente</span>`;
+
+          // Monta os bloquinhos de cada prazo/parcela (ex: 20/10, 20/11, 20/12)
+          let parcelasHTML = "";
+          if (item.parcelas && item.parcelas.length > 0) {
+            parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4 pt-3 border-t border-rose-50">`;
+            item.parcelas.forEach(p => {
+              const corParcela = p.pago 
+                ? "bg-emerald-50/70 border-emerald-200 text-emerald-800" 
+                : "bg-amber-50/70 border-amber-200 text-amber-800";
+              const iconeParcela = p.pago ? "✓ Pago" : "⏳ A pagar";
+
+              parcelasHTML += `
+                <div class="border rounded-xl p-2.5 flex justify-between sm:flex-col sm:items-start items-center ${corParcela}">
+                  <span class="text-xs font-semibold opacity-75">📅 Prazo: ${p.prazo}</span>
+                  <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1 gap-2">
+                    <span class="font-bold text-sm">${p.valor}</span>
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/80">${iconeParcela}</span>
+                  </div>
+                </div>
+              `;
+            });
+            parcelasHTML += `</div>`;
+          }
 
           resultadosDiv.innerHTML += `
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex flex-col md:flex-row justify-between gap-4">
-              <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-50 px-2.5 py-1 rounded-md">${item.ceg}</span>
-                <h3 class="text-lg font-bold text-slate-800 mt-2">${item.item}</h3>
-                <p class="text-sm text-slate-500 mt-1">📦 <strong>Status da CEG:</strong> ${item.statusCeg || 'Em andamento'}</p>
-              </div>
-              <div class="flex flex-col md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                ${badgePago}
-                <div class="mt-2 md:text-right">
-                  <p class="text-lg font-bold text-slate-800">${item.valor || 'R$ --'}</p>
-                  <p class="text-xs text-slate-400">📅 Prazo: ${item.prazo || 'A definir'}</p>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100">
+              <div class="flex flex-col md:flex-row justify-between md:items-start gap-2">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-50 px-2.5 py-1 rounded-md">${item.ceg}</span>
+                  <h3 class="text-lg font-bold text-slate-800 mt-2">Itens: ${item.item}</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Joiner: ${item.user}</p>
+                </div>
+                <div class="flex flex-col md:items-end justify-between gap-2">
+                  ${badgeGeral}
+                  <p class="text-xs text-slate-500">📦 <strong>Status:</strong> ${item.statusCeg}</p>
                 </div>
               </div>
+              ${parcelasHTML}
             </div>
           `;
         });
@@ -102,7 +125,7 @@
         loading.classList.add("hidden");
         resultadosDiv.innerHTML = `
           <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center">
-            Erro ao conectar com a planilha. Verifique se em "Gerenciar implantações" no Apps Script a opção "Quem pode acessar" está marcada como "Qualquer pessoa".
+            Erro ao conectar com a planilha. Verifique se publicou uma "Nova versão" em Gerenciar implantações.
           </div>`;
       }
     }
