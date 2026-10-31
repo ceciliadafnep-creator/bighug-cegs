@@ -180,15 +180,15 @@
 
   <!-- MODAL DE FOTO DO SET -->
   <div id="modalFoto" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
       <button onclick="fecharModalFoto()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
-      <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-center gap-2">
+      <h3 id="tituloModalFoto" class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-center gap-2">
         <span>📸</span> Foto do Set
       </h3>
 
-      <div id="conteudoFotoModal" class="mb-4 max-h-[60vh] overflow-y-auto flex items-center justify-center">
-        <!-- Conteúdo injetado via JS (iframe do drive ou imagem) -->
+      <div id="conteudoFotoModal" class="mb-4 h-[65vh] flex items-center justify-center">
+        <!-- Iframe do Drive injetado via JS -->
       </div>
 
       <button onclick="fecharModalFoto()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shadow-sm">
@@ -199,6 +199,29 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
+    
+    // Mapeamento direto dos links das pastas do Drive por nome da CEG
+    const linksFotosSet = {
+      "Academia do lobão pt.2": "https://drive.google.com/drive/folders/1jnT4L0p3OihcRK0MWdCVqQ4P13pfNILK?usp=drive_link",
+      "Bochechinhas do Hannie": "https://drive.google.com/drive/folders/1HNsmbMj66h_HiC__zXzWn_82n4hsPItl?usp=drive_link",
+      "Chan \"Preparatus?\"": "https://drive.google.com/drive/folders/1mqEK0JrmQ6nctlNxuhW4qNvxX4Q5s3dW?usp=drive_link",
+      "Chan´s Room 🐺": "https://drive.google.com/drive/folders/1BnnmjKsnV4O4-0VltlOioxWqvc9fNxaq?usp=drive_link",
+      "Chanlix": "https://drive.google.com/drive/folders/1ei9xZ3COkeUpPj7yXBya_3WgoOAfusvC?usp=drive_link",
+      "CHANtagem Emocional": "https://drive.google.com/drive/folders/1Oa6_hksUSxOBp4BZX_uuZnWLmBg3TXRu?usp=drive_link",
+      "Cosmo e Wanda & outros": "https://drive.google.com/drive/folders/14-DTbHQqLDo79oKtdT45RhGsVnKIVSKv?usp=drive_link",
+      "Dormitório Jeongchan": "https://drive.google.com/drive/folders/1QzMuAYXYaK981GIYZ8QaSuLbWvPnCT7s?usp=drive_link",
+      "Festinha do Hanji 🐿️🎂": "https://drive.google.com/drive/folders/1OYwkIlJO8VvG-iXjIrE5piCsmnNgt0Ai?usp=drive_link",
+      "Hyunlix meus pais": "https://drive.google.com/drive/folders/1m9T_MllqgnZOXOazvejRoy6dBe2J3tcq?usp=drive_link",
+      "Innie segunda chance": "https://drive.google.com/drive/folders/1gKajBg0aNn2R4nclhXExc1vkcM6xqx3h?usp=drive_link",
+      "Irmãos": "https://drive.google.com/drive/folders/1MCpZds8PO0yCx6I0D60NMUoshdg7EQUk?usp=drive_link",
+      "Lobo-chan": "https://drive.google.com/drive/folders/1iZMqdsI3H-HyESp5bbONdCWkn5iSqw9k?usp=drive_link",
+      "Mercadinho de banana": "https://drive.google.com/drive/folders/1JPXYaiLu3JGHG3S5SluXNuDUkakJsuz9?usp=drive_link",
+      "Rolling stones - Stray kids": "https://drive.google.com/drive/folders/1D5zwFKYYGueFxyr-9YkcpVJ71R7hko8Z?usp=drive_link",
+      "Seung de montão": "https://drive.google.com/drive/folders/1rWcnxyKzX0nCpd8Yt60BN6FjqfX9Zp6g?usp=drive_link",
+      "Straight kids": "https://drive.google.com/drive/folders/1MbCf0fcQBYoCzassEKlQz-Gfep2zLq6P?usp=drive_link",
+      "Vila Sésamo": "https://drive.google.com/drive/folders/128lVxFIKWWH_5IDBXMTQUhvj4Pij9hY8?usp=drive_link"
+    };
+
     let cacheDados = [];
     let todosExpandidos = false;
 
@@ -262,19 +285,25 @@
       document.getElementById("modalPagamento").classList.add("hidden");
     }
 
-    function abrirModalFoto(linkFoto) {
+    function abrirModalFoto(cegNome) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      if (!linkFoto) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-6">Nenhuma foto cadastrada para este set ainda. ✨</p>`;
-      } else {
-        // Se for link do Google Drive, converte para visualização embutida se necessário
-        let embedUrl = linkFoto;
-        if (linkFoto.includes("drive.google.com")) {
-          embedUrl = linkFoto.replace(/\/view.*$/, "/preview").replace(/\/edit.*$/, "/preview");
-          conteudoDiv.innerHTML = `<iframe src="${embedUrl}" class="w-full h-80 rounded-2xl border border-rose-100" allow="autoplay"></iframe>`;
-        } else {
-          conteudoDiv.innerHTML = `<img src="${linkFoto}" class="max-h-80 mx-auto rounded-2xl border border-rose-100 object-contain" alt="Foto do Set">`;
+      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> Foto do Set: ${cegNome}`;
+      
+      // Procura o link no dicionário (fazendo uma busca flexível sem se importar com maiúsculas/minúsculas)
+      let linkDrive = "";
+      for (const [key, value] of Object.entries(linksFotosSet)) {
+        if (key.trim().toLowerCase() === cegNome.trim().toLowerCase()) {
+          linkDrive = value;
+          break;
         }
+      }
+
+      if (!linkDrive) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-6">Nenhuma pasta de fotos cadastrada para esta CEG ainda. ✨</p>`;
+      } else {
+        // Converte o link da pasta do Drive para o formato embutido (preview)
+        let embedUrl = linkDrive.replace(/\/view.*$/, "/preview").replace(/\/edit.*$/, "/preview").replace(/\/usp=.*$/, "").replace(/\?usp=.*$/, "") + "/preview";
+        conteudoDiv.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-2xl border border-rose-100" allow="autoplay"></iframe>`;
       }
       document.getElementById("modalFoto").classList.remove("hidden");
     }
@@ -396,9 +425,7 @@
         }
 
         const delayAnim = Math.min(index * 0.06, 0.5);
-
-        // Tratamento seguro para passar o link da foto para o onclick
-        const fotoSetEscapada = item.fotoSet ? item.fotoSet.replace(/'/g, "\\'") : "";
+        const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
 
         resultadosDiv.innerHTML += `
           <div 
@@ -431,7 +458,7 @@
             <div class="detalhes-expand border-t border-rose-50">
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
-                <button onclick="abrirModalFoto('${fotoSetEscapada}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                <button onclick="abrirModalFoto('${cegNomeEscapado}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
                   📸 Ver Foto do Set
                 </button>
               </div>
