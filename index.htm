@@ -89,7 +89,7 @@
     <!-- Cabeçalho Interativo -->
     <header class="text-center my-8">
       <div class="inline-block bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-rose-100 text-xs font-bold text-rose-400 mb-3 shadow-sm">
-        🎀  Feito por @fbcrisimhere 🎀 
+        ✨ Portal de Joiners & Claims ✨
       </div>
       <h1 class="text-3xl md:text-5xl font-bold text-rose-400 mb-3 tracking-tight drop-shadow-sm transition hover:scale-105 duration-300 cursor-default">
         ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
@@ -106,7 +106,7 @@
         <input 
           type="text" 
           id="userInput" 
-          placeholder="Ex: @seu_user" 
+          placeholder="Ex: fbcrisimhere" 
           class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 focus:bg-white focus:outline-none text-slate-700 font-semibold placeholder:font-normal"
           onkeypress="if(event.key === 'Enter') buscarItens()"
         >
@@ -121,7 +121,7 @@
     <!-- Estado de Carregamento -->
     <div id="loading" class="hidden text-center py-12">
       <div class="inline-block w-10 h-10 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-3"></div>
-      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens em todas as abas... 💌</p>
+      <p class="text-rose-400 font-bold animate-pulse">Procurando seus photocards em todas as abas... 💌</p>
     </div>
 
     <!-- Painel de Resumo e Filtros (Aparece após a busca) -->
@@ -151,10 +151,10 @@
             ⏳ A Pagar
           </button>
           <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            📦 Na GOM
+            📦 Na GOM / Envio
           </button>
           <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            💚 Enviados
+            💚 Recebidos
           </button>
         </div>
         <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">
@@ -274,7 +274,7 @@
         // Tag rápida de envio visível mesmo com o card fechado
         let miniBadgeEnvio = "";
         if (item.statusEnvio === "recebido") {
-          miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Enviado</span>`;
+          miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Recebido</span>`;
         } else if (item.statusEnvio === "solicitado") {
           miniBadgeEnvio = `<span class="bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💛 Envio Solicitado</span>`;
         } else if (item.statusEnvio === "solicitar") {
@@ -287,13 +287,13 @@
           bannerEnvioHTML = `
             <div class="mb-3 bg-emerald-50/90 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
               <span class="text-base">💚</span>
-              <span><strong>Itens enviados!</strong> Confira o código de rastreio na planilha da GOM.</span>
+              <span><strong>Itens recebidos!</strong> O envio desta CEG já foi concluído e entregue a você.</span>
             </div>`;
         } else if (item.statusEnvio === "solicitado") {
           bannerEnvioHTML = `
             <div class="mb-3 bg-amber-50/90 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
               <span class="text-base">💛</span>
-              <span><strong>Envio já solicitado!</strong> Sua solicitação de envio já foi encaminhada para a GOM.</span>
+              <span><strong>Envio já solicitado!</strong> Seu pedido de envio já está anotado com a GOM.</span>
             </div>`;
         } else if (item.statusEnvio === "solicitar") {
           const limiteTexto = item.prazoEnvio ? `até a data limite (<strong>${item.prazoEnvio}</strong>)` : `até a data limite`;
@@ -350,7 +350,7 @@
                   ${miniBadgeEnvio}
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
-                  <span>🏷️  Itens: ${item.item}</span>
+                  <span>💿 Itens: ${item.item}</span>
                 </h3>
               </div>
 
@@ -381,5 +381,4 @@
   </script>
 </body>
 </html>
-
 
