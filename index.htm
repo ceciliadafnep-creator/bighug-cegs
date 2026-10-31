@@ -143,13 +143,12 @@
   <!-- MODAL DE PAGAMENTO (PIX / CARTÃO) -->
   <div id="modalPagamento" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 card-anim relative">
-      <button onclick="fecharModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
+      <button onclick="fecharModalPagamento()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
       <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
         <span>💳</span> Informações de Pagamento
       </h3>
 
-      <!-- Bloco Pix -->
       <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-4 mb-3">
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
@@ -159,7 +158,6 @@
         <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
       </div>
 
-      <!-- Bloco Cartão -->
       <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-3">
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Deseja pagar com Cartão?</p>
         <p class="text-xs text-slate-600 mb-2">Chamar no WhatsApp:</p>
@@ -169,14 +167,32 @@
         </div>
       </div>
 
-      <!-- Aviso do Comprovante -->
       <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3.5 rounded-xl text-xs font-semibold flex items-start gap-2">
         <span class="text-base">⚠️</span>
         <span>Após realizar o pagamento, <strong>envie o comprovante no grupo da CEG</strong> junto com o seu <strong>Nome + @</strong>!</span>
       </div>
 
-      <button onclick="fecharModal()" class="w-full mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm">
+      <button onclick="fecharModalPagamento()" class="w-full mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm">
         Entendido
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE FOTO DO SET -->
+  <div id="modalFoto" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-rose-100 card-anim relative text-center">
+      <button onclick="fecharModalFoto()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
+      
+      <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-center gap-2">
+        <span>📸</span> Foto do Set
+      </h3>
+
+      <div id="conteudoFotoModal" class="mb-4 max-h-[60vh] overflow-y-auto flex items-center justify-center">
+        <!-- Conteúdo injetado via JS (iframe do drive ou imagem) -->
+      </div>
+
+      <button onclick="fecharModalFoto()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shadow-sm">
+        Fechar
       </button>
     </div>
   </div>
@@ -238,12 +254,33 @@
       }
     }
 
-    function abrirModal() {
+    function abrirModalPagamento() {
       document.getElementById("modalPagamento").classList.remove("hidden");
     }
 
-    function fecharModal() {
+    function fecharModalPagamento() {
       document.getElementById("modalPagamento").classList.add("hidden");
+    }
+
+    function abrirModalFoto(linkFoto) {
+      const conteudoDiv = document.getElementById("conteudoFotoModal");
+      if (!linkFoto) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-6">Nenhuma foto cadastrada para este set ainda. ✨</p>`;
+      } else {
+        // Se for link do Google Drive, converte para visualização embutida se necessário
+        let embedUrl = linkFoto;
+        if (linkFoto.includes("drive.google.com")) {
+          embedUrl = linkFoto.replace(/\/view.*$/, "/preview").replace(/\/edit.*$/, "/preview");
+          conteudoDiv.innerHTML = `<iframe src="${embedUrl}" class="w-full h-80 rounded-2xl border border-rose-100" allow="autoplay"></iframe>`;
+        } else {
+          conteudoDiv.innerHTML = `<img src="${linkFoto}" class="max-h-80 mx-auto rounded-2xl border border-rose-100 object-contain" alt="Foto do Set">`;
+        }
+      }
+      document.getElementById("modalFoto").classList.remove("hidden");
+    }
+
+    function fecharModalFoto() {
+      document.getElementById("modalFoto").classList.add("hidden");
     }
 
     function copiarTexto(elementId, mensagemSucesso) {
@@ -343,7 +380,7 @@
               ? `🚚 Frete` 
               : `📅 Prazo: ${p.prazo}`;
 
-            const acionadorClick = p.pago ? "" : `onclick="abrirModal()" title="Clique para ver dados de pagamento"`;
+            const acionadorClick = p.pago ? "" : `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
 
             parcelasHTML += `
               <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
@@ -359,6 +396,9 @@
         }
 
         const delayAnim = Math.min(index * 0.06, 0.5);
+
+        // Tratamento seguro para passar o link da foto para o onclick
+        const fotoSetEscapada = item.fotoSet ? item.fotoSet.replace(/'/g, "\\'") : "";
 
         resultadosDiv.innerHTML += `
           <div 
@@ -389,9 +429,11 @@
             </div>
 
             <div class="detalhes-expand border-t border-rose-50">
-              <div class="flex items-center justify-between text-xs text-slate-400 mb-3">
+              <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
-                <span>✨ Clique no valor pendente para pagar</span>
+                <button onclick="abrirModalFoto('${fotoSetEscapada}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                  📸 Ver Foto do Set
+                </button>
               </div>
               ${bannerEnvioHTML}
               ${parcelasHTML}
