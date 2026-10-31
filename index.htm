@@ -83,7 +83,7 @@
         ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
       </h1>
       <p class="text-slate-500 text-sm md:text-base max-w-lg mx-auto">
-        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGs. Clique no valor da parcela para ver os dados de pagamento!
+        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGs. Clique em qualquer valor pendente para ver os dados de pagamento!
       </p>
     </header>
 
@@ -144,10 +144,9 @@
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 card-anim relative">
       <button onclick="fecharModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
-      <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+      <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
         <span>💳</span> Informações de Pagamento
       </h3>
-      <p id="modalInfoParcela" class="text-xs text-rose-500 font-semibold mb-4"></p>
 
       <!-- Bloco Pix -->
       <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-4 mb-3">
@@ -245,8 +244,7 @@
       }
     }
 
-    function abrirModal(cegNome, itemNome, valor, prazo) {
-      document.getElementById("modalInfoParcela").textContent = `${cegNome} • ${itemNome} • Valor: ${valor} (Prazo: ${prazo})`;
+    function abrirModal() {
       document.getElementById("modalPagamento").classList.remove("hidden");
     }
 
@@ -351,7 +349,7 @@
               ? `🚚 Frete` 
               : `📅 Prazo: ${p.prazo}`;
 
-            const acionadorClick = p.pago ? "" : `onclick="abrirModal('${item.ceg}', '${item.item}', '${p.valor}', '${p.prazo}')" title="Clique para ver dados de pagamento"`;
+            const acionadorClick = p.pago ? "" : `onclick="abrirModal()" title="Clique para ver dados de pagamento"`;
 
             parcelasHTML += `
               <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
