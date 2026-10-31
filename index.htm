@@ -89,7 +89,7 @@
     <!-- Cabeçalho Interativo -->
     <header class="text-center my-8">
       <div class="inline-block bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-rose-100 text-xs font-bold text-rose-400 mb-3 shadow-sm">
-        🎀  Feito por @fbcrisimhere 🎀 
+        🎀 Feito por @fbcrisimhere 🎀 
       </div>
       <h1 class="text-3xl md:text-5xl font-bold text-rose-400 mb-3 tracking-tight drop-shadow-sm transition hover:scale-105 duration-300 cursor-default">
         ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
@@ -185,7 +185,7 @@
       loading.classList.remove("hidden");
 
       try {
-        const response = await fetch(`APIURL?user={encodeURIComponent(input)}`, {
+        const response = await fetch(`${API_URL}?user=${encodeURIComponent(input)}`, {
           method: "GET",
           redirect: "follow"
         });
@@ -271,7 +271,6 @@
           ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`
           : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
 
-        // Tag rápida de envio visível mesmo com o card fechado
         let miniBadgeEnvio = "";
         if (item.statusEnvio === "recebido") {
           miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Enviado</span>`;
@@ -281,7 +280,6 @@
           miniBadgeEnvio = `<span class="bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce">🚨 Solicitar Envio!</span>`;
         }
 
-        // Banner completo de status do Envio dentro da área expandida
         let bannerEnvioHTML = "";
         if (item.statusEnvio === "recebido") {
           bannerEnvioHTML = `
@@ -305,7 +303,6 @@
             </div>`;
         }
 
-        // Monta os bloquinhos de cada prazo/parcela/frete
         let parcelasHTML = "";
         if (item.parcelas && item.parcelas.length > 0) {
           parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
@@ -340,7 +337,6 @@
             style="animation-delay: ${delayAnim}s"
             class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 cursor-pointer select-none">
             
-            <!-- Topo sempre visível do Card -->
             <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
               <div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -350,7 +346,7 @@
                   ${miniBadgeEnvio}
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
-                  <span>🏷️  Itens: ${item.item}</span>
+                  <span>🏷️ Itens: ${item.item}</span>
                 </h3>
               </div>
 
@@ -365,7 +361,6 @@
               </div>
             </div>
 
-            <!-- Área Expansível (Abre ao passar o mouse ou clicar) -->
             <div class="detalhes-expand border-t border-rose-50">
               <div class="flex items-center justify-between text-xs text-slate-400 mb-3">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
@@ -381,6 +376,3 @@
   </script>
 </body>
 </html>
-
-
-
