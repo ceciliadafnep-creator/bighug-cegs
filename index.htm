@@ -200,10 +200,10 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
     
-    // Dicionário com os links das fotos de cada CEG (aceita várias fotos separadas por vírgula)
+    // Dicionário com os links das fotos de cada CEG
     const fotosSets = {
       "Festinha do Hanji 🐿️🎂": [
-        "https://i.ibb.co/b5PxQcc6/foto1.jpg", // substitua pelos links diretos reais da imagem se precisar
+        "https://i.ibb.co/b5PxQcc6/foto1.jpg",
         "https://ibb.co/b5PxQcc6",
         "https://ibb.co/DPDjWPxT",
         "https://ibb.co/hJVpPy4C",
@@ -293,4 +293,189 @@
 
     function abrirModalFoto(cegNome) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      document.getElementById("
+      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> Fotos do Set: ${cegNome}`;
+      
+      let listaLinks = [];
+      for (const [key, value] of Object.entries(fotosSets)) {
+        if (key.trim().toLowerCase() === cegNome.trim().toLowerCase()) {
+          listaLinks = value;
+          break;
+        }
+      }
+
+      if (!listaLinks || listaLinks.length === 0) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-6 col-span-full">Nenhuma foto cadastrada para este set ainda. ✨</p>`;
+      } else {
+        let htmlImagens = "";
+        listaLinks.forEach(link => {
+          htmlImagens += `<a href="${link}" target="_blank" class="block border border-rose-100 rounded-2xl overflow-hidden shadow-xs hover:scale-102 transition"><img src="${link}" class="w-full h-48 object-cover" alt="Foto do Set"></a>`;
+        });
+        conteudoDiv.innerHTML = htmlImagens;
+      }
+      document.getElementById("modalFoto").classList.remove("hidden");
+    }
+
+    function fecharModalFoto() {
+      document.getElementById("modalFoto").classList.add("hidden");
+    }
+
+    function copiarTexto(elementId, mensagemSucesso) {
+      const texto = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(texto);
+      alert(mensagemSucesso);
+    }
+
+    function filtrarResultados(filtro) {
+      document.querySelectorAll(".filtro-btn").forEach(btn => {
+        btn.className = "filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition";
+      });
+      document.getElementById(`btn-${filtro}`).className = "filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition shadow-sm";
+
+      let filtrados = cacheDados;
+      if (filtro === "pendentes") {
+        filtrados = cacheDados.filter(i => i.resumoPago !== "Pago");
+      } else if (filtro === "nagom") {
+        filtrados = cacheDados.filter(i => i.statusEnvio === "solicitar" || i.statusEnvio === "solicitado");
+      } else if (filtro === "recebidos") {
+        filtrados = cacheDados.filter(i => i.statusEnvio === "recebido");
+      }
+
+      renderizarCards(filtrados);
+    }
+
+    function alternarTodosCards() {
+      todosExpandidos = !todosExpandidos;
+      const cards = document.querySelectorAll(".ceg-card");
+      cards.forEach(card => {
+        if (todosExpandidos) card.classList.add("aberto");
+        else card.classList.remove("aberto");
+      });
+      document.getElementById("btnExpandirTodos").textContent = todosExpandidos ? "↕ Recolher todos" : "↕ Expandir todos";
+    }
+
+    function renderizarCards(lista) {
+      const resultadosDiv = document.getElementById("resultados");
+      resultadosDiv.innerHTML = "";
+
+      if (lista.length === 0) {
+        resultadosDiv.innerHTML = `
+          <div class="bg-white/80 p-6 rounded-2xl text-center border border-rose-100 text-slate-400 text-sm">
+            Nenhuma CEG encontrada neste filtro. ✨
+          </div>`;
+        return;
+      }
+
+      lista.forEach((item, index) => {
+        const isTudoPago = item.resumoPago === "Pago";
+        const badgeGeral = isTudoPago 
+          ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`
+          : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
+
+        let miniBadgeEnvio = "";
+        if (item.statusEnvio === "recebido") {
+          miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Enviado</span>`;
+        } else if (item.statusEnvio === "solicitado") {
+          miniBadgeEnvio = `<span class="bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💛 Envio Solicitado</span>`;
+        } else if (item.statusEnvio === "solicitar") {
+          miniBadgeEnvio = `<span class="bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce">🚨 Solicitar Envio!</span>`;
+        }
+
+        let bannerEnvioHTML = "";
+        if (item.statusEnvio === "recebido") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-emerald-50/90 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💚</span>
+              <span><strong>Itens enviados!</strong> Confira o código de rastreio na planilha da GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitado") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-amber-50/90 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💛</span>
+              <span><strong>Envio já solicitado!</strong> Sua solicitação de envio já foi encaminhada para a GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitar") {
+          const limiteTexto = item.prazoEnvio ? `até a data limite (<strong>${item.prazoEnvio}</strong>)` : `até a data limite`;
+          const chegadaTexto = item.dataChegada ? ` (chegou em ${item.dataChegada})` : "";
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">🚨</span>
+              <span><strong>A CEG chegou na GOM${chegadaTexto}!</strong> Solicitar envio ${limiteTexto}.</span>
+            </div>`;
+        }
+
+        let parcelasHTML = "";
+        if (item.parcelas && item.parcelas.length > 0) {
+          parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
+          item.parcelas.forEach(p => {
+            const corParcela = p.pago 
+              ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60" 
+              : "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60 cursor-pointer hover:shadow-md hover:border-amber-300";
+            const iconeParcela = p.pago ? "✓ Pago" : "⏳ A pagar";
+            
+            const labelTopo = String(p.titulo).toLowerCase().includes("frete") 
+              ? `🚚 Frete` 
+              : `📅 Prazo: ${p.prazo}`;
+
+            const acionadorClick = p.pago ? "" : `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
+
+            parcelasHTML += `
+              <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
+                <span class="text-xs font-semibold opacity-75">${labelTopo}</span>
+                <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1.5 gap-2">
+                  <span class="font-bold text-sm underline decoration-dotted underline-offset-4">${p.valor}</span>
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 shadow-2xs">${iconeParcela}</span>
+                </div>
+              </div>
+            `;
+          });
+          parcelasHTML += `</div>`;
+        }
+
+        const delayAnim = Math.min(index * 0.06, 0.5);
+        const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
+
+        resultadosDiv.innerHTML += `
+          <div 
+            class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 select-none">
+            
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+                    ${item.ceg}
+                  </span>
+                  ${miniBadgeEnvio}
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
+                  <span>🏷️ Itens: ${item.item}</span>
+                </h3>
+              </div>
+
+              <div class="flex md:flex-col items-center md:items-end justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  ${badgeGeral}
+                  <span class="seta-indicador text-slate-400 text-xs transition-transform duration-300 bg-slate-50 w-6 h-6 flex items-center justify-center rounded-full border border-slate-100 cursor-pointer" onclick="this.closest('.ceg-card').classList.toggle('aberto')">
+                    ▼
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500">📦 <strong>Status:</strong> ${item.statusCeg}</p>
+              </div>
+            </div>
+
+            <div class="detalhes-expand border-t border-rose-50">
+              <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
+                <span>👤 Joiner: <strong>${item.user}</strong></span>
+                <button onclick="abrirModalFoto('${cegNomeEscapado}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                  📸 Ver Foto do Set
+                </button>
+              </div>
+              ${bannerEnvioHTML}
+              ${parcelasHTML}
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
