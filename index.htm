@@ -13,16 +13,9 @@
       overflow-x: hidden;
     }
 
-    /* Animação de entrada em cascata dos cards */
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .card-anim {
@@ -30,7 +23,6 @@
       opacity: 0;
     }
 
-    /* Efeito de expansão suave ao passar o mouse ou focar */
     .ceg-card {
       transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -41,7 +33,6 @@
       border-color: #f9a8d4;
     }
 
-    /* Área expansível de detalhes */
     .detalhes-expand {
       max-height: 0;
       opacity: 0;
@@ -63,7 +54,6 @@
       color: #f43f5e;
     }
 
-    /* Bolhas decorativas de fundo */
     .blob {
       position: fixed;
       border-radius: 50%;
@@ -81,12 +71,10 @@
 </head>
 <body class="min-h-screen text-slate-700 p-4 md:p-8 relative">
 
-  <!-- Decoração de Fundo -->
   <div class="blob w-72 h-72 bg-rose-200 top-[-40px] left-[-40px]"></div>
   <div class="blob w-80 h-80 bg-purple-200 bottom-[-50px] right-[-40px]" style="animation-delay: -5s;"></div>
 
   <div class="max-w-3xl mx-auto">
-    <!-- Cabeçalho Interativo -->
     <header class="text-center my-8">
       <div class="inline-block bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-rose-100 text-xs font-bold text-rose-400 mb-3 shadow-sm">
         🎀 Feito por @fbcrisimhere 🎀 
@@ -99,7 +87,6 @@
       </p>
     </header>
 
-    <!-- Barra de Pesquisa com Efeito Glassmorphism -->
     <div class="bg-white/90 backdrop-blur-md p-3 md:p-4 rounded-3xl shadow-lg shadow-rose-100/50 border border-rose-100 flex gap-2 mb-6 transition focus-within:ring-4 focus-within:ring-rose-200/60 focus-within:border-rose-300">
       <div class="relative w-full flex items-center">
         <span class="absolute left-4 text-rose-300 text-lg">🔍</span>
@@ -108,23 +95,20 @@
           id="userInput" 
           placeholder="Ex: @seu_user" 
           class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 focus:bg-white focus:outline-none text-slate-700 font-semibold placeholder:font-normal"
-          onkeypress="if(event.key === 'Enter') buscarItens()"
         >
       </div>
       <button 
-        onclick="buscarItens()" 
+        id="btnBuscar" 
         class="bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 active:scale-95 text-white font-bold px-7 py-3.5 rounded-2xl transition-all duration-200 shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-300 cursor-pointer shrink-0">
         Buscar
       </button>
     </div>
 
-    <!-- Estado de Carregamento -->
     <div id="loading" class="hidden text-center py-12">
       <div class="inline-block w-10 h-10 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-3"></div>
       <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens nas planilhas nacionais e internacionais... 💌</p>
     </div>
 
-    <!-- Painel de Resumo e Filtros (Aparece após a busca) -->
     <div id="painelResumo" class="hidden mb-6 space-y-4">
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-rose-100 text-center shadow-sm hover:scale-105 transition">
@@ -141,29 +125,17 @@
         </div>
       </div>
 
-      <!-- Botões de Filtro Rápido -->
       <div class="flex flex-wrap items-center justify-between gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-2xl border border-rose-100">
         <div class="flex flex-wrap gap-1.5">
-          <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            Todas
-          </button>
-          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            ⏳ A Pagar
-          </button>
-          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            📦 Na GOM
-          </button>
-          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">
-            💚 Enviados
-          </button>
+          <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">Todas</button>
+          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">⏳ A Pagar</button>
+          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">📦 Na GOM</button>
+          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">💚 Enviados</button>
         </div>
-        <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">
-          ↕ Expandir todos
-        </button>
+        <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">↕ Expandir todos</button>
       </div>
     </div>
 
-    <!-- Lista de Cards de Resultados -->
     <div id="resultados" class="space-y-4"></div>
   </div>
 
@@ -173,6 +145,14 @@
     
     let cacheDados = [];
     let todosExpandidos = false;
+
+    // Vincula os eventos diretamente via JS para evitar erros de onclick no navegador
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("btnBuscar").addEventListener("click", buscarItens);
+      document.getElementById("userInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") buscarItens();
+      });
+    });
 
     async function buscarItens() {
       const input = document.getElementById("userInput").value.trim();
@@ -187,7 +167,6 @@
       loading.classList.remove("hidden");
 
       try {
-        // Consulta simultânea nas duas planilhas
         const [resNacional, resInter] = await Promise.all([
           fetch(`${API_NACIONAL}?user=${encodeURIComponent(input)}`, { method: "GET", redirect: "follow" }).then(r => r.json()).catch(() => []),
           fetch(`${API_INTER}?user=${encodeURIComponent(input)}`, { method: "GET", redirect: "follow" }).then(r => r.json()).catch(() => [])
@@ -267,4 +246,114 @@
         return;
       }
 
-      lista.
+      lista.forEach((item, index) => {
+        const isTudoPago = item.resumoPago === "Pago";
+        const badgeGeral = isTudoPago 
+          ? `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs">✓ Tudo Pago</span>`
+          : `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
+
+        let miniBadgeEnvio = "";
+        if (item.statusEnvio === "recebido") {
+          miniBadgeEnvio = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💚 Enviado</span>`;
+        } else if (item.statusEnvio === "solicitado") {
+          miniBadgeEnvio = `<span class="bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💛 Envio Solicitado</span>`;
+        } else if (item.statusEnvio === "solicitar") {
+          miniBadgeEnvio = `<span class="bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce">🚨 Solicitar Envio!</span>`;
+        }
+
+        let bannerEnvioHTML = "";
+        if (item.statusEnvio === "recebido") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-emerald-50/90 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💚</span>
+              <span><strong>Itens enviados!</strong> Confira o código de rastreio na planilha da GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitado") {
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-amber-50/90 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">💛</span>
+              <span><strong>Envio já solicitado!</strong> Sua solicitação de envio já foi encaminhada para a GOM.</span>
+            </div>`;
+        } else if (item.statusEnvio === "solicitar") {
+          const limiteTexto = item.prazoEnvio ? `até a data limite (<strong>${item.prazoEnvio}</strong>)` : `até a data limite`;
+          const chegadaTexto = item.dataChegada ? ` (chegou em ${item.dataChegada})` : "";
+          bannerEnvioHTML = `
+            <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">🚨</span>
+              <span><strong>A CEG chegou na GOM${chegadaTexto}!</strong> Solicitar envio ${limiteTexto}.</span>
+            </div>`;
+        }
+
+        let parcelasHTML = "";
+        if (item.parcelas && item.parcelas.length > 0) {
+          parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
+          item.parcelas.forEach(p => {
+            const corParcela = p.pago 
+              ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60" 
+              : "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60";
+            const iconeParcela = p.pago ? "✓ Pago" : "⏳ A pagar";
+            
+            const labelTopo = String(p.titulo).toLowerCase().includes("frete") 
+              ? `🚚 Frete` 
+              : `📅 Prazo: ${p.prazo}`;
+
+            parcelasHTML += `
+              <div class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
+                <span class="text-xs font-semibold opacity-75">${labelTopo}</span>
+                <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1.5 gap-2">
+                  <span class="font-bold text-sm">${p.valor}</span>
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 shadow-2xs">${iconeParcela}</span>
+                </div>
+              </div>
+            `;
+          });
+          parcelasHTML += `</div>`;
+        }
+
+        const delayAnim = Math.min(index * 0.06, 0.5);
+
+        resultadosDiv.innerHTML += `
+          <div 
+            onclick="this.classList.toggle('aberto')" 
+            style="animation-delay: ${delayAnim}s"
+            class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 cursor-pointer select-none">
+            
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+                    ${item.ceg}
+                  </span>
+                  ${miniBadgeEnvio}
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
+                  <span>🏷️ Itens: ${item.item}</span>
+                </h3>
+              </div>
+
+              <div class="flex md:flex-col items-center md:items-end justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  ${badgeGeral}
+                  <span class="seta-indicador text-slate-400 text-xs transition-transform duration-300 bg-slate-50 w-6 h-6 flex items-center justify-center rounded-full border border-slate-100">
+                    ▼
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500">📦 <strong>Status:</strong> ${item.statusCeg}</p>
+              </div>
+            </div>
+
+            <div class="detalhes-expand border-t border-rose-50">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-3">
+                <span>👤 Joiner: <strong>${item.user}</strong></span>
+                <span>✨ Detalhes de pagamento & envio</span>
+              </div>
+              ${bannerEnvioHTML}
+              ${parcelasHTML}
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
