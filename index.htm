@@ -165,7 +165,7 @@
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
           <span id="chavePixTexto" class="text-sm font-bold text-slate-800 select-all">bighug.cegs@gmail.com</span>
-          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💖')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💕')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
         </div>
         <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
       </div>
@@ -208,16 +208,12 @@
   </div>
 
   <script>
-    // URL da planilha de Nacionais
     const API_URL_NACIONAL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
-    
-    // URL da planilha de Internacionais
     const API_URL_INTER = "https://script.google.com/macros/s/AKfycbwg61IPvSQLxe8xpvEcgKuFM2WZG7Yc92z1dzEVZUIljSh_rwg3QuAHgdBDLdjiby_Q/exec";
 
     let cacheDados = [];
     let todosExpandidos = false;
 
-    // Agrupa os claims da mesma aba exclusivamente para as CEGs Internacionais
     function agruparInternacionais(lista) {
       const nacionais = [];
       const intersMapa = {};
@@ -354,26 +350,39 @@
 
       try {
         const res = await fetch(`${apiUrlAlvo}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
-        const urls = await res.json();
-        exibirImagensNoModal(urls);
+        const arquivos = await res.json();
+        exibirImagensNoModal(arquivos);
       } catch (e) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos. Verifique se atualizou a implantação do Apps Script!</p>`;
+        conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos.</p>`;
       }
     }
 
-    function exibirImagensNoModal(urls) {
+    function exibirImagensNoModal(arquivos) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      if (!urls || urls.length === 0) {
+      if (!arquivos || arquivos.length === 0) {
         conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada na pasta desta CEG no Drive. ✨</p>`;
         return;
       }
 
       let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Dica: Toque na imagem para abrir em tela cheia e dar zoom!</p>`;
-      urls.forEach((url, i) => {
+      
+      arquivos.forEach((arq) => {
+        // Compatibilidade caso o script retorne apenas URL ou objeto com nome e url
+        const url = typeof arq === 'string' ? arq : arq.url;
+        const nomeBruto = typeof arq === 'object' && arq.nome ? arq.nome : "";
+        // Remove a extensão do arquivo (ex: .jpg, .png) para ficar limpo
+        const nomeArquivo = nomeBruto.replace(/\.[^/.]+$/, "").trim();
+
+        // Se o arquivo tiver nome próprio no Drive, exibe a etiqueta em cima
+        const etiquetaHTML = nomeArquivo && !/^img[\s_-]*\d+/i.test(nomeArquivo) && !/^\d+$/.test(nomeArquivo)
+          ? `<div class="bg-rose-50 border border-rose-200 text-rose-600 font-bold text-xs px-3 py-1.5 rounded-xl mb-2 inline-block shadow-2xs">🏷️ ${nomeArquivo}</div>`
+          : ``;
+
         html += `
-          <div class="foto-card bg-white p-3 rounded-2xl border border-rose-100 shadow-xs cursor-pointer">
+          <div class="foto-card bg-white p-3 rounded-2xl border border-rose-100 shadow-xs cursor-pointer mb-4 text-center">
+            ${etiquetaHTML}
             <a href="${url}" target="_blank" title="Clique para abrir e dar zoom">
-              <img src="${url}" class="w-full h-auto max-h-[58vh] object-contain mx-auto rounded-xl" alt="Foto do Set ${i + 1}" loading="lazy">
+              <img src="${url}" class="w-full h-auto max-h-[58vh] object-contain mx-auto rounded-xl" alt="${nomeArquivo || 'Foto do Set'}" loading="lazy">
             </a>
           </div>`;
       });
