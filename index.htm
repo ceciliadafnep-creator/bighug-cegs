@@ -196,7 +196,7 @@
       <button onclick="fecharModalFoto()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
       <h3 id="tituloModalFoto" class="text-lg font-bold text-slate-800 mb-3 flex items-center justify-center gap-2 pr-6">
-        <span>📸</span> Fotos dos Seus Itens
+        <span>📸</span> Fotos do Set
       </h3>
 
       <div id="conteudoFotoModal" class="mb-4 max-h-[68vh] overflow-y-auto space-y-4 p-3 bg-rose-50/30 rounded-2xl border border-rose-100/60"></div>
@@ -208,12 +208,16 @@
   </div>
 
   <script>
+    // URL da planilha de Nacionais
     const API_URL_NACIONAL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
+    
+    // URL da planilha de Internacionais
     const API_URL_INTER = "https://script.google.com/macros/s/AKfycbwg61IPvSQLxe8xpvEcgKuFM2WZG7Yc92z1dzEVZUIljSh_rwg3QuAHgdBDLdjiby_Q/exec";
 
     let cacheDados = [];
     let todosExpandidos = false;
 
+    // Agrupa os claims da mesma aba exclusivamente para as CEGs Internacionais
     function agruparInternacionais(lista) {
       const nacionais = [];
       const intersMapa = {};
@@ -256,7 +260,6 @@
         const nomes = grupo.subItens.map(s => s.nomeItem).join(", ");
         grupo.itemResumo = qtd > 1 ? `${qtd} itens (${nomes})` : nomes;
         grupo.parcelas = grupo.subItens.flatMap(s => s.parcelas);
-        grupo.listaNomesItens = grupo.subItens.map(s => String(s.nomeItem || "").trim().toLowerCase());
         return grupo;
       });
 
@@ -336,65 +339,41 @@
       document.getElementById("modalPagamento").classList.add("hidden");
     }
 
-    async function abrirModalFoto(cegNome, tipoCeg, itensJoiner) {
+    async function abrirModalFoto(cegNome, tipoCeg) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> Fotos dos Seus Itens - ${cegNome}`;
+      document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
       document.getElementById("modalFoto").classList.remove("hidden");
 
       conteudoDiv.innerHTML = `
         <div class="py-12 text-center">
           <div class="inline-block w-8 h-8 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-2"></div>
-          <p class="text-xs text-rose-400 font-bold animate-pulse">Buscando fotos correspondentes... ✨</p>
+          <p class="text-xs text-rose-400 font-bold animate-pulse">Carregando fotos do Drive... ✨</p>
         </div>`;
 
       const apiUrlAlvo = (tipoCeg === "inter" && API_URL_INTER.startsWith("https://")) ? API_URL_INTER : API_URL_NACIONAL;
 
       try {
         const res = await fetch(`${apiUrlAlvo}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
-        const arquivos = await res.json();
-        exibirImagensFiltradas(arquivos, itensJoiner, tipoCeg);
+        const urls = await res.json();
+        exibirImagensNoModal(urls);
       } catch (e) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos.</p>`;
+        conteudoDiv.innerHTML = `<p class="text-sm text-red-400 py-8">Não foi possível carregar as fotos. Verifique se atualizou a implantação do Apps Script!</p>`;
       }
     }
 
-    function exibirImagensFiltradas(arquivos, itensJoiner, tipoCeg) {
+    function exibirImagensNoModal(urls) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
-      
-      if (!arquivos || arquivos.length === 0) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada na pasta desta CEG. ✨</p>`;
+      if (!urls || urls.length === 0) {
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada na pasta desta CEG no Drive. ✨</p>`;
         return;
       }
 
-      let fotosFiltradas = arquivos;
-      if (tipoCeg === "inter" && itensJoiner && itensJoiner.length > 0) {
-        fotosFiltradas = arquivos.filter(arq => {
-          const nomeArq = typeof arq === 'string' ? arq : (arq.nome || "");
-          const nomeLimpo = nomeArq.toLowerCase();
-          
-          return itensJoiner.some(itemClaim => {
-            const itemLimpo = itemClaim.toLowerCase().trim();
-            // Extrai a palavra-chave principal (ex: de "& ver. changbin" pega "ver" ou "changbin", ou pega o nome da versão)
-            const palavras = itemLimpo.split(/[\s\.\-]+/).filter(p => p.length > 2);
-            
-            return nomeLimpo.includes(itemLimpo) || itemLimpo.includes(nomeLimpo) || palavras.some(palavra => nomeLimpo.includes(palavra));
-          });
-        });
-
-        if (fotosFiltradas.length === 0) {
-          fotosFiltradas = arquivos; // Fallback se não encontrar correspondência exata
-        }
-      }
-
-      let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Fotos correspondentes aos seus itens. Toque para ampliar!</p>`;
-      fotosFiltradas.forEach((arq, i) => {
-        const url = typeof arq === 'string' ? arq : arq.url;
-        const nomeOriginal = typeof arq === 'object' && arq.nome ? arq.nome.replace(/\.[^/.]+$/, "") : `Foto ${i + 1}`;
+      let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Dica: Toque na imagem para abrir em tela cheia e dar zoom!</p>`;
+      urls.forEach((url, i) => {
         html += `
-          <div class="foto-card bg-white p-3 rounded-2xl border border-rose-100 shadow-xs cursor-pointer mb-3">
-            <p class="text-xs font-bold text-rose-500 mb-1">🏷️ ${nomeOriginal}</p>
-            <a href="${url}" target="_blank" title="Clique para abrir em tela cheia">
-              <img src="${url}" class="w-full h-auto max-h-[50vh] object-contain mx-auto rounded-xl" alt="Foto ${i + 1}" loading="lazy">
+          <div class="foto-card bg-white p-3 rounded-2xl border border-rose-100 shadow-xs cursor-pointer">
+            <a href="${url}" target="_blank" title="Clique para abrir e dar zoom">
+              <img src="${url}" class="w-full h-auto max-h-[58vh] object-contain mx-auto rounded-xl" alt="Foto do Set ${i + 1}" loading="lazy">
             </a>
           </div>`;
       });
@@ -469,7 +448,7 @@
         if (tituloLower.includes("frete inter")) {
           labelTopo = `✈️ Frete Inter`;
         } else if (tituloLower.includes("frete")) {
-          labelTopo = `🚚 Frete`;
+          labelTopo = `🚚 Frete Nacional`;
         } else if (tituloLower.includes("taxa")) {
           labelTopo = `🏛️ Taxa`;
         }
@@ -572,7 +551,6 @@
 
         const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
         const tituloPrincipal = item.tipo === "inter" && item.itemResumo ? item.itemResumo : item.item;
-        const listaNomesJson = item.tipo === "inter" ? JSON.stringify(item.listaNomesItens || []).replace(/"/g, '&quot;') : '[]';
 
         resultadosDiv.innerHTML += `
           <div class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 select-none">
@@ -604,7 +582,7 @@
             <div class="detalhes-expand border-t border-rose-50">
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
-                <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}', JSON.parse('${listaNomesJson}'))" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
                   📸 Ver Foto do Set
                 </button>
               </div>
