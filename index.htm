@@ -93,7 +93,7 @@
         ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
       </h1>
       <p class="text-slate-500 text-sm md:text-base max-w-lg mx-auto">
-        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGs. Clique em qualquer valor pendente para ver os dados de pagamento!
+        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGs Nacionais e Internacionais. Clique em qualquer valor pendente para ver os dados de pagamento!
       </p>
     </header>
 
@@ -117,13 +117,13 @@
 
     <div id="loading" class="hidden text-center py-12">
       <div class="inline-block w-10 h-10 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-3"></div>
-      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens em todas as abas... 💌</p>
+      <p class="text-rose-400 font-bold animate-pulse">Procurando seus itens nas planilhas... 💌</p>
     </div>
 
     <div id="painelResumo" class="hidden mb-6 space-y-4">
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-rose-100 text-center shadow-sm hover:scale-105 transition">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de CEGs</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de Claims</p>
           <p id="statTotalCegs" class="text-2xl font-bold text-rose-400 mt-0.5">0</p>
         </div>
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-emerald-100 text-center shadow-sm hover:scale-105 transition">
@@ -139,6 +139,8 @@
       <div class="flex flex-wrap items-center justify-between gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-2xl border border-rose-100">
         <div class="flex flex-wrap gap-1.5">
           <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">Todas</button>
+          <button onclick="filtrarResultados('nacionais')" id="btn-nacionais" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">🇧🇷 Nacionais</button>
+          <button onclick="filtrarResultados('inters')" id="btn-inters" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">🇰🇷 Internacionais</button>
           <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">⏳ A Pagar</button>
           <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">📦 Na GOM</button>
           <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">💚 Enviados</button>
@@ -206,7 +208,12 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
+    // URL da planilha de Nacionais
+    const API_URL_NACIONAL = "https://script.google.com/macros/s/AKfycbwsUFQ80dEPIcomPQsXjxJwuzFafNjmcHfT5gBLHL0pmQ4ko3-V0GtB6kPp109VMnVaqg/exec";
+    
+    // URL da planilha de Internacionais
+    const API_URL_INTER = "https://script.google.com/macros/s/AKfycbwg61IPvSQLxe8xpvEcgKuFM2WZG7Yc92z1dzEVZUIljSh_rwg3QuAHgdBDLdjiby_Q/exec";
+
     let cacheDados = [];
     let todosExpandidos = false;
 
@@ -223,12 +230,24 @@
       loading.classList.remove("hidden");
 
       try {
-        const response = await fetch(`${API_URL}?user=${encodeURIComponent(input)}&t=${Date.now()}`, {
-          method: "GET",
-          redirect: "follow"
-        });
-        
-        const dados = await response.json();
+        const requisicoes = [
+          fetch(`${API_URL_NACIONAL}?user=${encodeURIComponent(input)}&t=${Date.now()}`, { method: "GET", redirect: "follow" })
+            .then(r => r.json())
+            .then(d => Array.isArray(d) ? d.map(item => ({ ...item, tipo: "nacional" })) : [])
+            .catch(() => [])
+        ];
+
+        if (API_URL_INTER && API_URL_INTER.startsWith("https://")) {
+          requisicoes.push(
+            fetch(`${API_URL_INTER}?user=${encodeURIComponent(input)}&t=${Date.now()}`, { method: "GET", redirect: "follow" })
+              .then(r => r.json())
+              .then(d => Array.isArray(d) ? d.map(item => ({ ...item, tipo: "inter" })) : [])
+              .catch(() => [])
+          );
+        }
+
+        const resultados = await Promise.all(requisicoes);
+        const dados = resultados.flat();
         cacheDados = dados;
         loading.classList.add("hidden");
 
@@ -270,7 +289,7 @@
       document.getElementById("modalPagamento").classList.add("hidden");
     }
 
-    async function abrirModalFoto(cegNome) {
+    async function abrirModalFoto(cegNome, tipoCeg) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
       document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
       document.getElementById("modalFoto").classList.remove("hidden");
@@ -281,8 +300,10 @@
           <p class="text-xs text-rose-400 font-bold animate-pulse">Carregando fotos do Drive... ✨</p>
         </div>`;
 
+      const apiUrlAlvo = (tipoCeg === "inter" && API_URL_INTER.startsWith("https://")) ? API_URL_INTER : API_URL_NACIONAL;
+
       try {
-        const res = await fetch(`${API_URL}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
+        const res = await fetch(`${apiUrlAlvo}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
         const urls = await res.json();
         exibirImagensNoModal(urls);
       } catch (e) {
@@ -326,7 +347,11 @@
       document.getElementById(`btn-${filtro}`).className = "filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition shadow-sm";
 
       let filtrados = cacheDados;
-      if (filtro === "pendentes") {
+      if (filtro === "nacionais") {
+        filtrados = cacheDados.filter(i => i.tipo === "nacional");
+      } else if (filtro === "inters") {
+        filtrados = cacheDados.filter(i => i.tipo === "inter");
+      } else if (filtro === "pendentes") {
         filtrados = cacheDados.filter(i => i.resumoPago !== "Pago");
       } else if (filtro === "nagom") {
         filtrados = cacheDados.filter(i => i.statusEnvio === "solicitar" || i.statusEnvio === "solicitado");
@@ -359,9 +384,9 @@
         return;
       }
 
-      lista.forEach((item, index) => {
+      lista.forEach((item) => {
         const isTudoPago = item.resumoPago === "Pago";
-        const temVencida = item.parcelas.some(p => p.vencida && !p.pago);
+        const temVencida = item.parcelas && item.parcelas.some(p => p.vencida && !p.pago);
 
         let badgeGeral = "";
         if (isTudoPago) {
@@ -371,6 +396,10 @@
         } else {
           badgeGeral = `<span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs animate-pulse">⏳ A Pagar</span>`;
         }
+
+        let badgeTipo = item.tipo === "inter"
+          ? `<span class="bg-purple-50 text-purple-600 border border-purple-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">🇰🇷 Inter</span>`
+          : `<span class="bg-sky-50 text-sky-600 border border-sky-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">🇧🇷 Nacional</span>`;
 
         let miniBadgeEnvio = "";
         if (item.statusEnvio === "recebido") {
@@ -425,9 +454,15 @@
               acionadorClick = `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
             }
             
-            const labelTopo = String(p.titulo).toLowerCase().includes("frete") 
-              ? `🚚 Frete` 
-              : `📅 Prazo: ${p.prazo}`;
+            const tituloLower = String(p.titulo).toLowerCase();
+            let labelTopo = `📅 Prazo: ${p.prazo}`;
+            if (tituloLower.includes("frete inter")) {
+              labelTopo = `✈️ Frete Inter`;
+            } else if (tituloLower.includes("frete")) {
+              labelTopo = `🚚 Frete Nacional`;
+            } else if (tituloLower.includes("taxa")) {
+              labelTopo = `🏛️ Taxa`;
+            }
 
             parcelasHTML += `
               <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
@@ -452,6 +487,7 @@
                   <span class="text-xs font-bold uppercase tracking-wider text-rose-500 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
                     ${item.ceg}
                   </span>
+                  ${badgeTipo}
                   ${miniBadgeEnvio}
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
@@ -473,7 +509,7 @@
             <div class="detalhes-expand border-t border-rose-50">
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
-                <button onclick="abrirModalFoto('${cegNomeEscapado}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
                   📸 Ver Foto do Set
                 </button>
               </div>
