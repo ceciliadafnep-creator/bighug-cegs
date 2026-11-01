@@ -139,11 +139,11 @@
       <div class="flex flex-wrap items-center justify-between gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-2xl border border-rose-100">
         <div class="flex flex-wrap gap-1.5">
           <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">Todas</button>
-          <button onclick="filtrarResultados('nacionais')" id="btn-nacionais" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition"><span style="font-family: sans-serif;">🇧🇷</span> Nacionais</button>
-          <button onclick="filtrarResultados('inters')" id="btn-inters" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition"><span style="font-family: sans-serif;">🇰🇷/🇯🇵</span> Internacionais</button>
-          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition"><span style="font-family: sans-serif;">⏳</span> A Pagar</button>
-          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition"><span style="font-family: sans-serif;">📦</span> Na GOM</button>
-          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition"><span style="font-family: sans-serif;">💚</span> Enviados</button>
+          <button onclick="filtrarResultados('nacionais')" id="btn-nacionais" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5"><img src="https://flagcdn.com/24x18/br.png" alt="BR" class="w-4 h-3 object-cover rounded-2xs"> Nacionais</button>
+          <button onclick="filtrarResultados('inters')" id="btn-inters" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition flex items-center gap-1"><img src="https://flagcdn.com/24x18/kr.png" alt="KR" class="w-4 h-3 object-cover rounded-2xs">/<img src="https://flagcdn.com/24x18/jp.png" alt="JP" class="w-4 h-3 object-cover rounded-2xs"> Internacionais</button>
+          <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">⏳ A Pagar</button>
+          <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">📦 Na GOM</button>
+          <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">💚 Enviados</button>
         </div>
         <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">↕ Expandir todos</button>
       </div>
@@ -509,8 +509,8 @@
         }
 
         let badgeTipo = item.tipo === "inter"
-          ? `<span class="bg-purple-50 text-purple-600 border border-purple-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full"><span style="font-family: sans-serif;">🇰🇷/🇯🇵</span> Inter</span>`
-          : `<span class="bg-sky-50 text-sky-600 border border-sky-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">🇧🇷 Nacional</span>`;
+          ? `<span class="bg-purple-50 text-purple-600 border border-purple-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1"><img src="https://flagcdn.com/16x12/kr.png" alt="KR" class="w-3.5 h-2.5 object-cover rounded-2xs">/<img src="https://flagcdn.com/16x12/jp.png" alt="JP" class="w-3.5 h-2.5 object-cover rounded-2xs"> Inter</span>`
+          : `<span class="bg-sky-50 text-sky-600 border border-sky-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1"><img src="https://flagcdn.com/16x12/br.png" alt="BR" class="w-3.5 h-2.5 object-cover rounded-2xs"> Nacional</span>`;
 
         let miniBadgeEnvio = "";
         if (item.statusEnvio === "recebido") {
