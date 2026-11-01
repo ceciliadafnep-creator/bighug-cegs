@@ -47,12 +47,12 @@
       max-height: 0;
       opacity: 0;
       overflow: hidden;
-      transition: max-height 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, margin-top 0.35s ease, padding-top 0.35s ease;
+      transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease, margin-top 0.35s ease, padding-top 0.35s ease;
     }
 
     .ceg-card:hover .detalhes-expand,
     .ceg-card.aberto .detalhes-expand {
-      max-height: 600px;
+      max-height: 3000px;
       opacity: 1;
       margin-top: 1rem;
       padding-top: 0.85rem;
@@ -123,7 +123,7 @@
     <div id="painelResumo" class="hidden mb-6 space-y-4">
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-rose-100 text-center shadow-sm hover:scale-105 transition">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de Claims</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de CEGs</p>
           <p id="statTotalCegs" class="text-2xl font-bold text-rose-400 mt-0.5">0</p>
         </div>
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-emerald-100 text-center shadow-sm hover:scale-105 transition">
@@ -217,6 +217,55 @@
     let cacheDados = [];
     let todosExpandidos = false;
 
+    // Agrupa os claims da mesma aba exclusivamente para as CEGs Internacionais
+    function agruparInternacionais(lista) {
+      const nacionais = [];
+      const intersMapa = {};
+
+      lista.forEach(item => {
+        if (item.tipo !== "inter") {
+          nacionais.push(item);
+        } else {
+          const chave = item.ceg;
+          if (!intersMapa[chave]) {
+            intersMapa[chave] = {
+              ...item,
+              subItens: [{
+                nomeItem: item.item,
+                parcelas: item.parcelas || [],
+                resumoPago: item.resumoPago
+              }]
+            };
+          } else {
+            intersMapa[chave].subItens.push({
+              nomeItem: item.item,
+              parcelas: item.parcelas || [],
+              resumoPago: item.resumoPago
+            });
+
+            if (item.resumoPago !== "Pago") {
+              intersMapa[chave].resumoPago = "A pagar";
+            }
+            if (item.statusEnvio === "solicitar") {
+              intersMapa[chave].statusEnvio = "solicitar";
+            } else if (item.statusEnvio === "solicitado" && intersMapa[chave].statusEnvio !== "solicitar") {
+              intersMapa[chave].statusEnvio = "solicitado";
+            }
+          }
+        }
+      });
+
+      const intersAgrupadas = Object.values(intersMapa).map(grupo => {
+        const qtd = grupo.subItens.length;
+        const nomes = grupo.subItens.map(s => s.nomeItem).join(", ");
+        grupo.itemResumo = qtd > 1 ? `${qtd} itens (${nomes})` : nomes;
+        grupo.parcelas = grupo.subItens.flatMap(s => s.parcelas);
+        return grupo;
+      });
+
+      return [...nacionais, ...intersAgrupadas];
+    }
+
     async function buscarItens() {
       const input = document.getElementById("userInput").value.trim();
       const resultadosDiv = document.getElementById("resultados");
@@ -247,7 +296,8 @@
         }
 
         const resultados = await Promise.all(requisicoes);
-        const dados = resultados.flat();
+        const dadosBrutos = resultados.flat();
+        const dados = agruparInternacionais(dadosBrutos);
         cacheDados = dados;
         loading.classList.add("hidden");
 
@@ -372,6 +422,51 @@
       document.getElementById("btnExpandirTodos").textContent = todosExpandidos ? "↕ Recolher todos" : "↕ Expandir todos";
     }
 
+    function montarParcelasGrid(parcelas) {
+      if (!parcelas || parcelas.length === 0) return "";
+      let html = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
+      parcelas.forEach(p => {
+        let corParcela = "";
+        let iconeParcela = "";
+        let acionadorClick = "";
+
+        if (p.pago) {
+          corParcela = "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60";
+          iconeParcela = "✓ Pago";
+        } else if (p.vencida) {
+          corParcela = "bg-rose-50/90 border-rose-300 text-rose-900 hover:bg-rose-100/70 cursor-pointer hover:shadow-md hover:border-rose-400";
+          iconeParcela = "⚠️ Multa acionada";
+          acionadorClick = `onclick="abrirModalPagamento()" title="Prazo vencido! Clique para ver dados de pagamento"`;
+        } else {
+          corParcela = "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60 cursor-pointer hover:shadow-md hover:border-amber-300";
+          iconeParcela = "⏳ A pagar";
+          acionadorClick = `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
+        }
+        
+        const tituloLower = String(p.titulo).toLowerCase();
+        let labelTopo = `📅 Prazo: ${p.prazo}`;
+        if (tituloLower.includes("frete inter")) {
+          labelTopo = `✈️ Frete Inter`;
+        } else if (tituloLower.includes("frete")) {
+          labelTopo = `🚚 Frete Nacional`;
+        } else if (tituloLower.includes("taxa")) {
+          labelTopo = `🏛️ Taxa`;
+        }
+
+        html += `
+          <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
+            <span class="text-xs font-semibold opacity-75">${labelTopo}</span>
+            <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1.5 gap-2">
+              <span class="font-bold text-sm underline decoration-dotted underline-offset-4">${p.valor}</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 shadow-2xs">${iconeParcela}</span>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      return html;
+    }
+
     function renderizarCards(lista) {
       const resultadosDiv = document.getElementById("resultados");
       resultadosDiv.innerHTML = "";
@@ -433,51 +528,29 @@
             </div>`;
         }
 
-        let parcelasHTML = "";
-        if (item.parcelas && item.parcelas.length > 0) {
-          parcelasHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">`;
-          item.parcelas.forEach(p => {
-            let corParcela = "";
-            let iconeParcela = "";
-            let acionadorClick = "";
-
-            if (p.pago) {
-              corParcela = "bg-emerald-50/70 border-emerald-200 text-emerald-800 hover:bg-emerald-100/60";
-              iconeParcela = "✓ Pago";
-            } else if (p.vencida) {
-              corParcela = "bg-rose-50/90 border-rose-300 text-rose-900 hover:bg-rose-100/70 cursor-pointer hover:shadow-md hover:border-rose-400";
-              iconeParcela = "⚠️ Multa acionada";
-              acionadorClick = `onclick="abrirModalPagamento()" title="Prazo vencido! Clique para ver dados de pagamento"`;
-            } else {
-              corParcela = "bg-amber-50/70 border-amber-200 text-amber-800 hover:bg-amber-100/60 cursor-pointer hover:shadow-md hover:border-amber-300";
-              iconeParcela = "⏳ A pagar";
-              acionadorClick = `onclick="abrirModalPagamento()" title="Clique para ver dados de pagamento"`;
-            }
-            
-            const tituloLower = String(p.titulo).toLowerCase();
-            let labelTopo = `📅 Prazo: ${p.prazo}`;
-            if (tituloLower.includes("frete inter")) {
-              labelTopo = `✈️ Frete Inter`;
-            } else if (tituloLower.includes("frete")) {
-              labelTopo = `🚚 Frete Nacional`;
-            } else if (tituloLower.includes("taxa")) {
-              labelTopo = `🏛️ Taxa`;
-            }
-
-            parcelasHTML += `
-              <div ${acionadorClick} class="border rounded-xl p-3 flex justify-between sm:flex-col sm:items-start items-center transition ${corParcela}">
-                <span class="text-xs font-semibold opacity-75">${labelTopo}</span>
-                <div class="flex items-center justify-between w-auto sm:w-full mt-0 sm:mt-1.5 gap-2">
-                  <span class="font-bold text-sm underline decoration-dotted underline-offset-4">${p.valor}</span>
-                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 shadow-2xs">${iconeParcela}</span>
+        let conteudoInternoHTML = "";
+        if (item.tipo === "inter" && item.subItens && item.subItens.length > 0) {
+          conteudoInternoHTML = `<div class="space-y-3">`;
+          item.subItens.forEach((sub, idx) => {
+            conteudoInternoHTML += `
+              <div class="bg-rose-50/30 border border-rose-100/80 rounded-2xl p-3.5">
+                <div class="flex items-center justify-between mb-2.5">
+                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <span class="bg-rose-100 text-rose-600 w-5 h-5 rounded-full inline-flex items-center justify-center text-[10px]">${idx + 1}</span>
+                    🏷️ Item: <span class="text-rose-500">${sub.nomeItem}</span>
+                  </span>
                 </div>
+                ${montarParcelasGrid(sub.parcelas)}
               </div>
             `;
           });
-          parcelasHTML += `</div>`;
+          conteudoInternoHTML += `</div>`;
+        } else {
+          conteudoInternoHTML = montarParcelasGrid(item.parcelas);
         }
 
         const cegNomeEscapado = item.ceg.replace(/'/g, "\\'");
+        const tituloPrincipal = item.tipo === "inter" && item.itemResumo ? item.itemResumo : item.item;
 
         resultadosDiv.innerHTML += `
           <div class="ceg-card card-anim bg-white/95 backdrop-blur-sm p-5 rounded-3xl shadow-sm border border-rose-100 select-none">
@@ -491,11 +564,11 @@
                   ${miniBadgeEnvio}
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mt-2 flex items-center gap-2">
-                  <span>🏷️ Itens: ${item.item}</span>
+                  <span>🏷️ Itens: ${tituloPrincipal}</span>
                 </h3>
               </div>
 
-              <div class="flex md:flex-col items-center md:items-end justify-between gap-2">
+              <div class="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2">
                   ${badgeGeral}
                   <span class="seta-indicador text-slate-400 text-xs transition-transform duration-300 bg-slate-50 w-6 h-6 flex items-center justify-center rounded-full border border-slate-100 cursor-pointer" onclick="this.closest('.ceg-card').classList.toggle('aberto')">
@@ -514,7 +587,7 @@
                 </button>
               </div>
               ${bannerEnvioHTML}
-              ${parcelasHTML}
+              ${conteudoInternoHTML}
             </div>
           </div>
         `;
