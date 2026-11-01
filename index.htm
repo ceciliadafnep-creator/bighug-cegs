@@ -165,7 +165,7 @@
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
           <span id="chavePixTexto" class="text-sm font-bold text-slate-800 select-all">bighug.cegs@gmail.com</span>
-          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💕')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💖')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
         </div>
         <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
       </div>
@@ -253,8 +253,18 @@
 
       const intersAgrupadas = Object.values(intersMapa).map(grupo => {
         const qtd = grupo.subItens.length;
-        const nomes = grupo.subItens.map(s => s.nomeItem).join(", ");
-        grupo.itemResumo = qtd > 1 ? `${qtd} itens (${nomes})` : nomes;
+        const nomesArray = grupo.subItens.map(s => s.nomeItem);
+        
+        // Limita a exibição no cabeçalho a no máximo 2 itens + reticências
+        let resumoItens = "";
+        if (qtd <= 2) {
+          resumoItens = `${qtd} itens (${nomesArray.join(", ")})`;
+        } else {
+          const primeiros = nomesArray.slice(0, 2).join(", ");
+          resumoItens = `${qtd} itens (${primeiros} ...)`;
+        }
+
+        grupo.itemResumo = resumoItens;
         grupo.parcelas = grupo.subItens.flatMap(s => s.parcelas);
         return grupo;
       });
@@ -367,13 +377,10 @@
       let html = `<p class="text-[11px] text-slate-400 font-semibold mb-2">💡 Dica: Toque na imagem para abrir em tela cheia e dar zoom!</p>`;
       
       arquivos.forEach((arq) => {
-        // Compatibilidade caso o script retorne apenas URL ou objeto com nome e url
         const url = typeof arq === 'string' ? arq : arq.url;
         const nomeBruto = typeof arq === 'object' && arq.nome ? arq.nome : "";
-        // Remove a extensão do arquivo (ex: .jpg, .png) para ficar limpo
         const nomeArquivo = nomeBruto.replace(/\.[^/.]+$/, "").trim();
 
-        // Se o arquivo tiver nome próprio no Drive, exibe a etiqueta em cima
         const etiquetaHTML = nomeArquivo && !/^img[\s_-]*\d+/i.test(nomeArquivo) && !/^\d+$/.test(nomeArquivo)
           ? `<div class="bg-rose-50 border border-rose-200 text-rose-600 font-bold text-xs px-3 py-1.5 rounded-xl mb-2 inline-block shadow-2xs">🏷️ ${nomeArquivo}</div>`
           : ``;
