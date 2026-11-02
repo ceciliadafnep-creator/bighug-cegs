@@ -508,6 +508,9 @@
         try {
           const resposta = await fetch(API_URL_INTER, {
             method: "POST",
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8"
+            },
             body: JSON.stringify({
               action: "uploadComprovante",
               fileName: nomeFinalArquivo,
@@ -516,18 +519,25 @@
             })
           });
 
-          const resJson = await resposta.json();
+          const textoRes = await resposta.text();
+          let resJson;
+          try {
+            resJson = JSON.parse(textoRes);
+          } catch (errParse) {
+            throw new Error("Resposta inválida do servidor: " + textoRes);
+          }
+
           if (resJson.sucesso) {
             statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 block";
-            statusDiv.innerHTML = `✅ Comprovante enviado com sucesso!<br><span class="text-[10px] font-normal">Salvo como: ${nomeFinalArquivo}</span>`;
+            statusDiv.innerHTML = `✅ Comprovante enviado com sucesso!<br><span class="text-[10px] font-normal">Salvo como: ${resJson.nome || nomeFinalArquivo}</span>`;
             fileInput.value = "";
           } else {
-            throw new Error(resJson.erro || "Erro desconhecido");
+            throw new Error(resJson.erro || "Erro desconhecido no servidor");
           }
         } catch (err) {
           console.error(err);
           statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
-          statusDiv.textContent = "❌ Erro ao enviar.";
+          statusDiv.textContent = "❌ Erro ao enviar: " + err.message;
         } finally {
           btn.disabled = false;
           btn.textContent = "📤 Enviar Comprovante";
