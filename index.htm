@@ -154,16 +154,28 @@
     <div id="resultados" class="space-y-4"></div>
   </div>
 
-  <!-- MODAL DE PAGAMENTO -->
+  <!-- MODAL DE PAGAMENTO COM SELETOR DE ITENS -->
   <div id="modalPagamento" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 card-anim relative">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-rose-100 card-anim relative max-h-[90vh] flex flex-col">
       <button onclick="fecharModalPagamento()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
-      <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+      <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2 shrink-0">
         <span>💳</span> Informações de Pagamento
       </h3>
+      <p class="text-xs text-slate-500 mb-3 shrink-0">Selecione abaixo os itens que deseja pagar agora:</p>
 
-      <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-4 mb-3">
+      <!-- Lista com scroll de itens pendentes -->
+      <div id="listaSeletorPagamento" class="space-y-2 mb-4 overflow-y-auto max-h-48 p-2 bg-slate-50 rounded-2xl border border-slate-200 shrink-0">
+        <!-- Preenchido via JavaScript -->
+      </div>
+
+      <!-- Resumo do valor selecionado -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-3 flex items-center justify-between shrink-0">
+        <span class="text-xs font-bold text-amber-900 uppercase">Total Selecionado:</span>
+        <span id="valorTotalSelecionado" class="text-lg font-bold text-amber-600">R$ 0,00</span>
+      </div>
+
+      <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-4 mb-3 shrink-0">
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
           <span id="chavePixTexto" class="text-sm font-bold text-slate-800 select-all">bighug.cegs@gmail.com</span>
@@ -172,7 +184,7 @@
         <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
       </div>
 
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-3">
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-3 shrink-0">
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Deseja pagar com Cartão?</p>
         <p class="text-xs text-slate-600 mb-2">Chamar no WhatsApp:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-200">
@@ -181,12 +193,12 @@
         </div>
       </div>
 
-      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3.5 rounded-xl text-xs font-semibold flex items-start gap-2">
+      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs font-semibold flex items-start gap-2 shrink-0">
         <span class="text-base">⚠️</span>
         <span>Após realizar o pagamento, <strong>envie o comprovante no grupo da CEG</strong> junto com o seu <strong>Nome + @</strong>!</span>
       </div>
 
-      <button onclick="fecharModalPagamento()" class="w-full mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm">
+      <button onclick="fecharModalPagamento()" class="w-full mt-3 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shrink-0">
         Entendido
       </button>
     </div>
@@ -334,7 +346,6 @@
         const quitadas = dados.filter(i => i.resumoPago === "Pago").length;
         const pendentes = total - quitadas;
 
-        // Soma automática de todos os valores pendentes em formato de dinheiro
         let somaTotalPendentes = 0;
         dados.forEach(item => {
           if (item.parcelas && Array.isArray(item.parcelas)) {
@@ -373,7 +384,57 @@
     }
 
     function abrirModalPagamento() {
+      const containerLista = document.getElementById("listaSeletorPagamento");
+      containerLista.innerHTML = "";
+
+      let htmlItens = "";
+      let contadorPendentes = 0;
+
+      cacheDados.forEach(item => {
+        if (item.parcelas && Array.isArray(item.parcelas)) {
+          item.parcelas.forEach(p => {
+            if (!p.pago && p.valor) {
+              contadorPendentes++;
+              let numLimpo = String(p.valor)
+                .replace(/[^\d,.-]/g, "")
+                .replace(/\./g, "")
+                .replace(",", ".");
+              let valorNum = parseFloat(numLimpo) || 0;
+              let nomeExibicao = `${item.ceg} (${p.titulo})`;
+
+              htmlItens += `
+                <label class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200 hover:border-rose-300 transition cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                    <input type="checkbox" value="${valorNum}" checked onchange="atualizarSomaCarrinho()" class="checkbox-pagamento w-4 h-4 accent-rose-400 rounded cursor-pointer">
+                    <span class="text-xs font-bold text-slate-700">${nomeExibicao}</span>
+                  </div>
+                  <span class="text-xs font-bold text-rose-500">${p.valor}</span>
+                </label>
+              `;
+            }
+          });
+        }
+      });
+
+      if (contadorPendentes === 0) {
+        containerLista.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum item pendente encontrado! ✨</p>`;
+      } else {
+        containerLista.innerHTML = htmlItens;
+      }
+
+      atualizarSomaCarrinho();
       document.getElementById("modalPagamento").classList.remove("hidden");
+    }
+
+    function atualizarSomaCarrinho() {
+      const checkboxes = document.querySelectorAll(".checkbox-pagamento:checked");
+      let soma = 0;
+      checkboxes.forEach(cb => {
+        soma += parseFloat(cb.value) || 0;
+      });
+
+      const formatado = soma.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      document.getElementById("valorTotalSelecionado").textContent = formatado;
     }
 
     function fecharModalPagamento() {
@@ -634,7 +695,7 @@
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
                 <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}', '${item.user}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
-                  📸 Ver Foto dos Itens
+                  📸 Ver Foto dos Items
                 </button>
               </div>
               ${bannerEnvioHTML}
