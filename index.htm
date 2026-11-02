@@ -93,7 +93,7 @@
         ⠀︵⠀𝓑ighug cegs ⠀◌Ⳋ𝅄
       </h1>
       <p class="text-slate-500 text-sm md:text-base max-w-lg mx-auto">
-        Digite seu <strong>@</strong> para consultar seus itens, prazos e status das CEGSs. Clique nas cegs para ver mais informações!
+        Digite seu <strong>@</strong> para consultar os seus itens, prazos e status das compras. Clique nas cegs para ver mais informações!
       </p>
     </header>
 
@@ -303,6 +303,18 @@
         const resultados = await Promise.all(requisicoes);
         const dadosBrutos = resultados.flat();
         const dados = agruparInternacionais(dadosBrutos);
+
+        // ORDENAÇÃO: 1º Multa, 2º A Pagar, 3º Tudo Pago
+        dados.sort((a, b) => {
+          const getPrioridade = (item) => {
+            const temVencida = item.parcelas && item.parcelas.some(p => p.vencida && !p.pago);
+            if (temVencida) return 1; // Multa acionada primeiro
+            if (item.resumoPago !== "Pago") return 2; // A pagar em segundo
+            return 3; // Tudo pago por último
+          };
+          return getPrioridade(a) - getPrioridade(b);
+        });
+
         cacheDados = dados;
         loading.classList.add("hidden");
 
