@@ -165,7 +165,7 @@
         <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
         <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
           <span id="chavePixTexto" class="text-sm font-bold text-slate-800 select-all">bighug.cegs@gmail.com</span>
-          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💕')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💖')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
         </div>
         <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
       </div>
@@ -356,7 +356,7 @@
       document.getElementById("modalPagamento").classList.add("hidden");
     }
 
-    async function abrirModalFoto(cegNome, tipoCeg) {
+    async function abrirModalFoto(cegNome, tipoCeg, userName) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
       document.getElementById("tituloModalFoto").innerHTML = `<span>📸</span> ${cegNome}`;
       document.getElementById("modalFoto").classList.remove("hidden");
@@ -370,7 +370,7 @@
       const apiUrlAlvo = (tipoCeg === "inter" && API_URL_INTER.startsWith("https://")) ? API_URL_INTER : API_URL_NACIONAL;
 
       try {
-        const res = await fetch(`${apiUrlAlvo}?action=fotos&ceg=${encodeURIComponent(cegNome)}&t=${Date.now()}`);
+        const res = await fetch(`${apiUrlAlvo}?action=fotos&ceg=${encodeURIComponent(cegNome)}&user=${encodeURIComponent(userName || '')}&t=${Date.now()}`);
         const arquivos = await res.json();
         exibirImagensNoModal(arquivos);
       } catch (e) {
@@ -609,8 +609,8 @@
             <div class="detalhes-expand border-t border-rose-50">
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
-                <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
-                  📸 Ver Foto do Set
+                <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}', '${item.user}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                  📸 Ver Foto dos Itens
                 </button>
               </div>
               ${bannerEnvioHTML}
