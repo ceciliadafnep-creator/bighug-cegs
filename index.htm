@@ -130,8 +130,10 @@
           <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Quitadas</p>
           <p id="statQuitadas" class="text-2xl font-bold text-emerald-500 mt-0.5">0</p>
         </div>
-        <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-100 text-center shadow-sm hover:scale-105 transition">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">A Pagar</p>
+        
+        <!-- CARD DE A PAGAR CLICÁVEL -->
+        <div onclick="abrirModalPagamento()" class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-100 text-center shadow-sm hover:scale-105 hover:bg-amber-50/50 hover:border-amber-300 transition cursor-pointer" title="Clique para ver dados de pagamento">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">A Pagar 💳</p>
           <p id="statPendentes" class="text-xl md:text-2xl font-bold text-amber-500 mt-0.5">R$ 0,00</p>
         </div>
       </div>
