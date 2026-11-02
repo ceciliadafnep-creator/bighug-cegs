@@ -402,10 +402,11 @@
               let valorNum = parseFloat(numLimpo) || 0;
               let nomeExibicao = `${item.ceg} (${p.titulo})`;
 
+              // Removido o 'checked' para vir tudo desmarcado por padrão
               htmlItens += `
                 <label class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200 hover:border-rose-300 transition cursor-pointer">
                   <div class="flex items-center gap-2.5">
-                    <input type="checkbox" value="${valorNum}" checked onchange="atualizarSomaCarrinho()" class="checkbox-pagamento w-4 h-4 accent-rose-400 rounded cursor-pointer">
+                    <input type="checkbox" value="${valorNum}" onchange="atualizarSomaCarrinho()" class="checkbox-pagamento w-4 h-4 accent-rose-400 rounded cursor-pointer">
                     <span class="text-xs font-bold text-slate-700">${nomeExibicao}</span>
                   </div>
                   <span class="text-xs font-bold text-rose-500">${p.valor}</span>
@@ -695,7 +696,7 @@
               <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-3 gap-2">
                 <span>👤 Joiner: <strong>${item.user}</strong></span>
                 <button onclick="abrirModalFoto('${cegNomeEscapado}', '${item.tipo}', '${item.user}')" class="bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
-                  📸 Ver Foto dos Items
+                  📸 Ver Foto dos Itens
                 </button>
               </div>
               ${bannerEnvioHTML}
