@@ -140,7 +140,7 @@
         <div class="flex flex-wrap gap-1.5">
           <button onclick="filtrarResultados('todos')" id="btn-todos" class="filtro-btn bg-rose-400 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">Todas</button>
           <button onclick="filtrarResultados('nacionais')" id="btn-nacionais" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">🇧🇷 Nacionais</button>
-          <button onclick="filtrarResultados('inters')" id="btn-inters" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">🇰🇷 Internacionais</button>
+          <button onclick="filtrarResultados('inters')" id="btn-inters" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">🇰🇷/🇯🇵 Internacionais</button>
           <button onclick="filtrarResultados('pendentes')" id="btn-pendentes" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">⏳ A Pagar</button>
           <button onclick="filtrarResultados('nagom')" id="btn-nagom" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">📦 Na GOM</button>
           <button onclick="filtrarResultados('recebidos')" id="btn-recebidos" class="filtro-btn text-slate-600 hover:bg-rose-50 text-xs font-bold px-3.5 py-1.5 rounded-xl transition">💚 Enviados</button>
@@ -354,7 +354,7 @@
       conteudoDiv.innerHTML = `
         <div class="py-12 text-center">
           <div class="inline-block w-8 h-8 border-4 border-rose-200 border-t-rose-400 rounded-full animate-spin mb-2"></div>
-          <p class="text-xs text-rose-400 font-bold animate-pulse">Carregando fotos do Drive... ✨</p>
+          <p class="text-xs text-rose-400 font-bold animate-pulse">Carregando fotos... ✨</p>
         </div>`;
 
       const apiUrlAlvo = (tipoCeg === "inter" && API_URL_INTER.startsWith("https://")) ? API_URL_INTER : API_URL_NACIONAL;
@@ -371,7 +371,7 @@
     function exibirImagensNoModal(arquivos) {
       const conteudoDiv = document.getElementById("conteudoFotoModal");
       if (!arquivos || arquivos.length === 0) {
-        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada na pasta desta CEG no Drive. ✨</p>`;
+        conteudoDiv.innerHTML = `<p class="text-sm text-slate-500 py-8">Nenhuma foto encontrada. ✨</p>`;
         return;
       }
 
