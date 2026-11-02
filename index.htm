@@ -257,11 +257,11 @@
         
         let resumoItens = "";
         if (qtd <= 2) {
-          resumoItens = nomesArray.join(", ");
+          resumoItens = `${qtd} ${qtd === 1 ? 'item' : 'itens'} (${nomesArray.join(", ")})`;
         } else {
           const primeiros = nomesArray.slice(0, 2).join(", ");
           const resto = qtd - 2;
-          resumoItens = `${primeiros} ... e mais ${resto} ${resto === 1 ? 'item' : 'itens'}`;
+          resumoItens = `${qtd} itens (${primeiros} ... e mais ${resto} ${resto === 1 ? 'item' : 'itens'})`;
         }
 
         grupo.itemResumo = resumoItens;
