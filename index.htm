@@ -131,7 +131,6 @@
           <p id="statQuitadas" class="text-2xl font-bold text-emerald-500 mt-0.5">0</p>
         </div>
         
-        <!-- CARD DE A PAGAR CLICÁVEL -->
         <div onclick="abrirModalPagamento()" class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-100 text-center shadow-sm hover:scale-105 hover:bg-amber-50/50 hover:border-amber-300 transition cursor-pointer" title="Clique para ver dados de pagamento">
           <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">A Pagar 💳</p>
           <p id="statPendentes" class="text-xl md:text-2xl font-bold text-amber-500 mt-0.5">R$ 0,00</p>
@@ -154,18 +153,18 @@
     <div id="resultados" class="space-y-4"></div>
   </div>
 
-  <!-- MODAL DE PAGAMENTO COM SELETOR EXPANDIDO E PIX/CARTÃO LADO A LADO -->
+  <!-- MODAL DE PAGAMENTO COM SELETOR E UPLOAD DE COMPROVANTE (.jpg, .png, .pdf) -->
   <div id="modalPagamento" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-rose-100 card-anim relative max-h-[92vh] flex flex-col">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-rose-100 card-anim relative max-h-[94vh] overflow-y-auto flex flex-col">
       <button onclick="fecharModalPagamento()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
       <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2 shrink-0">
         <span>💳</span> Informações de Pagamento
       </h3>
-      <p class="text-xs text-slate-500 mb-2.5 shrink-0">Selecione abaixo os itens que deseja pagar agora:</p>
+      <p class="text-xs text-slate-500 mb-2.5 shrink-0">1. Selecione abaixo os itens que deseja pagar agora:</p>
 
-      <!-- Lista com scroll de itens pendentes (mais longa para baixo) -->
-      <div id="listaSeletorPagamento" class="space-y-2 mb-3 overflow-y-auto max-h-60 p-2 bg-slate-50 rounded-2xl border border-slate-200 shrink-0">
+      <!-- Lista com scroll de itens pendentes -->
+      <div id="listaSeletorPagamento" class="space-y-2 mb-3 overflow-y-auto max-h-52 p-2 bg-slate-50 rounded-2xl border border-slate-200 shrink-0">
         <!-- Preenchido via JavaScript -->
       </div>
 
@@ -175,9 +174,8 @@
         <span id="valorTotalSelecionado" class="text-lg font-bold text-amber-600">R$ 0,00</span>
       </div>
 
-      <!-- CHAVE PIX E CARTÃO LADO A LADO (Grid em telas maiores) -->
+      <!-- CHAVE PIX E CARTÃO LADO A LADO -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 shrink-0">
-        <!-- Chave Pix -->
         <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 flex flex-col justify-between">
           <div>
             <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
@@ -189,7 +187,6 @@
           <p class="text-[10px] text-slate-500 leading-tight"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
         </div>
 
-        <!-- Pagar com Cartão -->
         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex flex-col justify-between">
           <div>
             <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Pagar com Cartão?</p>
@@ -203,13 +200,32 @@
         </div>
       </div>
 
-      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 mb-3">
-        <span class="text-sm">⚠️</span>
-        <span>Após realizar o pagamento, <strong>envie o comprovante no grupo da CEG</strong> junto com o seu <strong>Nome + @</strong>!</span>
+      <!-- ÁREA DE ANEXAR E ENVIAR COMPROVANTE (JPG, PNG, PDF) -->
+      <div class="bg-purple-50/70 border border-purple-200 rounded-2xl p-3.5 mb-3 shrink-0">
+        <p class="text-xs font-bold text-purple-900 mb-1 flex items-center gap-1.5">
+          <span>📎</span> 2. Anexar Comprovante (JPG, PNG ou PDF):
+        </p>
+        <p class="text-[11px] text-slate-500 mb-2.5">Marque os itens pagos na lista acima, selecione o arquivo do comprovante e clique em enviar direto para o sistema!</p>
+        
+        <div class="flex flex-col sm:flex-row items-center gap-2">
+          <input 
+            type="file" 
+            id="inputArquivoComprovante" 
+            accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf"
+            class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 file:cursor-pointer bg-white rounded-xl border border-purple-200 p-1"
+          >
+          <button 
+            id="btnEnviarComprovante"
+            onclick="enviarComprovanteDrive()" 
+            class="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-rose-400 hover:from-purple-600 hover:to-rose-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition cursor-pointer shrink-0 shadow-sm">
+            📤 Enviar Comprovante
+          </button>
+        </div>
+        <div id="statusEnvioComprovante" class="hidden mt-2 text-xs font-bold text-center py-1.5 px-3 rounded-xl"></div>
       </div>
 
-      <button onclick="fecharModalPagamento()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shrink-0">
-        Entendido
+      <button onclick="fecharModalPagamento()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl transition cursor-pointer text-sm shrink-0">
+        Fechar
       </button>
     </div>
   </div>
@@ -328,13 +344,12 @@
         const dadosBrutos = resultados.flat();
         const dados = agruparInternacionais(dadosBrutos);
 
-        // ORDENAÇÃO: 1º Multa, 2º A Pagar, 3º Tudo Pago
         dados.sort((a, b) => {
           const getPrioridade = (item) => {
             const temVencida = item.parcelas && item.parcelas.some(p => p.vencida && !p.pago);
-            if (temVencida) return 1; // Multa acionada primeiro
-            if (item.resumoPago !== "Pago") return 2; // A pagar em segundo
-            return 3; // Tudo pago por último
+            if (temVencida) return 1;
+            if (item.resumoPago !== "Pago") return 2;
+            return 3;
           };
           return getPrioridade(a) - getPrioridade(b);
         });
@@ -354,7 +369,6 @@
 
         const total = dados.length;
         const quitadas = dados.filter(i => i.resumoPago === "Pago").length;
-        const pendentes = total - quitadas;
 
         let somaTotalPendentes = 0;
         dados.forEach(item => {
@@ -395,7 +409,12 @@
 
     function abrirModalPagamento() {
       const containerLista = document.getElementById("listaSeletorPagamento");
+      const statusDiv = document.getElementById("statusEnvioComprovante");
+      const inputArq = document.getElementById("inputArquivoComprovante");
+      
       containerLista.innerHTML = "";
+      statusDiv.classList.add("hidden");
+      if (inputArq) inputArq.value = "";
 
       let htmlItens = "";
       let contadorPendentes = 0;
@@ -411,11 +430,12 @@
                 .replace(",", ".");
               let valorNum = parseFloat(numLimpo) || 0;
               let nomeExibicao = `${item.ceg} (${p.titulo})`;
+              let nomeSeguro = nomeExibicao.replace(/"/g, '&quot;');
 
               htmlItens += `
                 <label class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200 hover:border-rose-300 transition cursor-pointer">
                   <div class="flex items-center gap-2.5">
-                    <input type="checkbox" value="${valorNum}" onchange="atualizarSomaCarrinho()" class="checkbox-pagamento w-4 h-4 accent-rose-400 rounded cursor-pointer">
+                    <input type="checkbox" value="${valorNum}" data-nome="${nomeSeguro}" onchange="atualizarSomaCarrinho()" class="checkbox-pagamento w-4 h-4 accent-rose-400 rounded cursor-pointer">
                     <span class="text-xs font-bold text-slate-700">${nomeExibicao}</span>
                   </div>
                   <span class="text-xs font-bold text-rose-500">${p.valor}</span>
@@ -445,6 +465,75 @@
 
       const formatado = soma.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       document.getElementById("valorTotalSelecionado").textContent = formatado;
+    }
+
+    async function enviarComprovanteDrive() {
+      const checkboxes = document.querySelectorAll(".checkbox-pagamento:checked");
+      const fileInput = document.getElementById("inputArquivoComprovante");
+      const statusDiv = document.getElementById("statusEnvioComprovante");
+      const btn = document.getElementById("btnEnviarComprovante");
+
+      if (checkboxes.length === 0) {
+        alert("Por favor, selecione na lista acima quais CEGs/itens você está pagando! ☝️");
+        return;
+      }
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Por favor, anexe o arquivo (JPG, PNG ou PDF) do comprovante! 📎");
+        return;
+      }
+
+      const arquivo = fileInput.files[0];
+      const userDigitado = document.getElementById("userInput").value.trim();
+      const joinerNome = (cacheDados.length > 0 && cacheDados[0].user) ? cacheDados[0].user : userDigitado;
+      const valorTotalTexto = document.getElementById("valorTotalSelecionado").textContent;
+
+      const cegsSelecionadas = [];
+      checkboxes.forEach(cb => {
+        cegsSelecionadas.push(cb.getAttribute("data-nome"));
+      });
+
+      const ext = arquivo.name.split('.').pop() || 'png';
+      const nomeLimpoCegs = cegsSelecionadas.join(", ").replace(/[\/\\?%*:|"<>]/g, "-");
+      const nomeFinalArquivo = `${joinerNome} - ${valorTotalTexto} - [${nomeLimpoCegs}].${ext}`;
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Enviando...";
+      statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 block animate-pulse";
+      statusDiv.textContent = "Enviando comprovante... Aguarde ✨";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64String = e.target.result.split(',')[1];
+        try {
+          const resposta = await fetch(API_URL_INTER, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "uploadComprovante",
+              fileName: nomeFinalArquivo,
+              mimeType: arquivo.type || "application/octet-stream",
+              base64: base64String
+            })
+          });
+
+          const resJson = await resposta.json();
+          if (resJson.sucesso) {
+            statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 block";
+            statusDiv.innerHTML = `✅ Comprovante enviado com sucesso!<br><span class="text-[10px] font-normal">Salvo como: ${nomeFinalArquivo}</span>`;
+            fileInput.value = "";
+          } else {
+            throw new Error(resJson.erro || "Erro desconhecido");
+          }
+        } catch (err) {
+          console.error(err);
+          statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 block";
+          statusDiv.textContent = "❌ Erro ao enviar.";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "📤 Enviar Comprovante";
+        }
+      };
+      reader.readAsDataURL(arquivo);
     }
 
     function fecharModalPagamento() {
