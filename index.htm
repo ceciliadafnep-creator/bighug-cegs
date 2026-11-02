@@ -131,8 +131,8 @@
           <p id="statQuitadas" class="text-2xl font-bold text-emerald-500 mt-0.5">0</p>
         </div>
         <div class="bg-white/85 backdrop-blur-sm p-3.5 rounded-2xl border border-amber-100 text-center shadow-sm hover:scale-105 transition">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pendentes</p>
-          <p id="statPendentes" class="text-2xl font-bold text-amber-500 mt-0.5">0</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">A Pagar</p>
+          <p id="statPendentes" class="text-xl md:text-2xl font-bold text-amber-500 mt-0.5">R$ 0,00</p>
         </div>
       </div>
 
@@ -332,9 +332,31 @@
         const quitadas = dados.filter(i => i.resumoPago === "Pago").length;
         const pendentes = total - quitadas;
 
+        // Soma automática de todos os valores pendentes em formato de dinheiro
+        let somaTotalPendentes = 0;
+        dados.forEach(item => {
+          if (item.parcelas && Array.isArray(item.parcelas)) {
+            item.parcelas.forEach(p => {
+              if (!p.pago && p.valor) {
+                let numLimpo = String(p.valor)
+                  .replace(/[^\d,.-]/g, "")
+                  .replace(/\./g, "")
+                  .replace(",", ".");
+                let valorNum = parseFloat(numLimpo);
+                if (!isNaN(valorNum)) {
+                  somaTotalPendentes += valorNum;
+                }
+              }
+            });
+          }
+        });
+
+        const valorFormatado = somaTotalPendentes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
         document.getElementById("statTotalCegs").textContent = total;
         document.getElementById("statQuitadas").textContent = quitadas;
-        document.getElementById("statPendentes").textContent = pendentes;
+        document.getElementById("statPendentes").textContent = valorFormatado;
+        
         painelResumo.classList.remove("hidden");
 
         renderizarCards(dados);
