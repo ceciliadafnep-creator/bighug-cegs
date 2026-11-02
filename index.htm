@@ -154,51 +154,61 @@
     <div id="resultados" class="space-y-4"></div>
   </div>
 
-  <!-- MODAL DE PAGAMENTO COM SELETOR DE ITENS -->
+  <!-- MODAL DE PAGAMENTO COM SELETOR EXPANDIDO E PIX/CARTÃO LADO A LADO -->
   <div id="modalPagamento" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-rose-100 card-anim relative max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-rose-100 card-anim relative max-h-[92vh] flex flex-col">
       <button onclick="fecharModalPagamento()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 cursor-pointer">✕</button>
       
-      <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2 shrink-0">
+      <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2 shrink-0">
         <span>💳</span> Informações de Pagamento
       </h3>
-      <p class="text-xs text-slate-500 mb-3 shrink-0">Selecione abaixo os itens que deseja pagar agora:</p>
+      <p class="text-xs text-slate-500 mb-2.5 shrink-0">Selecione abaixo os itens que deseja pagar agora:</p>
 
-      <!-- Lista com scroll de itens pendentes -->
-      <div id="listaSeletorPagamento" class="space-y-2 mb-4 overflow-y-auto max-h-48 p-2 bg-slate-50 rounded-2xl border border-slate-200 shrink-0">
+      <!-- Lista com scroll de itens pendentes (mais longa para baixo) -->
+      <div id="listaSeletorPagamento" class="space-y-2 mb-3 overflow-y-auto max-h-60 p-2 bg-slate-50 rounded-2xl border border-slate-200 shrink-0">
         <!-- Preenchido via JavaScript -->
       </div>
 
       <!-- Resumo do valor selecionado -->
-      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-3 flex items-center justify-between shrink-0">
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-3 flex items-center justify-between shrink-0">
         <span class="text-xs font-bold text-amber-900 uppercase">Total Selecionado:</span>
         <span id="valorTotalSelecionado" class="text-lg font-bold text-amber-600">R$ 0,00</span>
       </div>
 
-      <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-4 mb-3 shrink-0">
-        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
-        <div class="flex items-center justify-between bg-white px-3 py-2.5 rounded-xl border border-rose-200 mb-2">
-          <span id="chavePixTexto" class="text-sm font-bold text-slate-800 select-all">bighug.cegs@gmail.com</span>
-          <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💖')" class="text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+      <!-- CHAVE PIX E CARTÃO LADO A LADO (Grid em telas maiores) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 shrink-0">
+        <!-- Chave Pix -->
+        <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 flex flex-col justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Chave Pix:</p>
+            <div class="flex items-center justify-between bg-white px-2.5 py-2 rounded-xl border border-rose-200 mb-1.5">
+              <span id="chavePixTexto" class="text-xs font-bold text-slate-800 select-all truncate mr-1">bighug.cegs@gmail.com</span>
+              <button onclick="copiarTexto('chavePixTexto', 'Chave Pix copiada com sucesso! 💖')" class="text-[11px] bg-rose-400 hover:bg-rose-500 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 leading-tight"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
         </div>
-        <p class="text-[11px] text-slate-500"><strong>Titular:</strong> Isabela Esteves Fernandes<br><strong>Banco:</strong> Nubank</p>
+
+        <!-- Pagar com Cartão -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex flex-col justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Pagar com Cartão?</p>
+            <p class="text-[10px] text-slate-600 mb-1.5">Chamar no WhatsApp:</p>
+            <div class="flex items-center justify-between bg-white px-2.5 py-2 rounded-xl border border-slate-200 mb-1">
+              <span id="telefoneCartao" class="text-xs font-bold text-slate-800 truncate mr-1">+55 11 92239-1357</span>
+              <button onclick="copiarTexto('telefoneCartao', 'Número de contato copiado com sucesso! 💳')" class="text-[11px] bg-slate-700 hover:bg-slate-800 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-400">Atendimento via WhatsApp</p>
+        </div>
       </div>
 
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-3 shrink-0">
-        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Deseja pagar com Cartão?</p>
-        <p class="text-xs text-slate-600 mb-2">Chamar no WhatsApp:</p>
-        <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-200">
-          <span id="telefoneCartao" class="text-sm font-bold text-slate-800">+55 11 92239-1357</span>
-          <button onclick="copiarTexto('telefoneCartao', 'Número de contato copiado com sucesso! 💳')" class="text-xs bg-slate-700 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0">Copiar</button>
-        </div>
-      </div>
-
-      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs font-semibold flex items-start gap-2 shrink-0">
-        <span class="text-base">⚠️</span>
+      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 mb-3">
+        <span class="text-sm">⚠️</span>
         <span>Após realizar o pagamento, <strong>envie o comprovante no grupo da CEG</strong> junto com o seu <strong>Nome + @</strong>!</span>
       </div>
 
-      <button onclick="fecharModalPagamento()" class="w-full mt-3 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shrink-0">
+      <button onclick="fecharModalPagamento()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition cursor-pointer text-sm shrink-0">
         Entendido
       </button>
     </div>
@@ -402,7 +412,6 @@
               let valorNum = parseFloat(numLimpo) || 0;
               let nomeExibicao = `${item.ceg} (${p.titulo})`;
 
-              // Removido o 'checked' para vir tudo desmarcado por padrão
               htmlItens += `
                 <label class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200 hover:border-rose-300 transition cursor-pointer">
                   <div class="flex items-center gap-2.5">
