@@ -105,6 +105,7 @@
           id="userInput" 
           placeholder="Ex: @seu_user" 
           class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-rose-50/50 border border-rose-100 focus:bg-white focus:outline-none text-slate-700 font-semibold placeholder:font-normal"
+          onkeydown="tocarSomTecla()"
           onkeypress="if(event.key === 'Enter') buscarItens()"
         >
       </div>
@@ -254,6 +255,41 @@
 
     let cacheDados = [];
     let todosExpandidos = false;
+
+    // Funções de Efeitos Sonoros 🎵
+    function tocarSomTecla() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function tocarSomSucesso() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {}
+    }
 
     function agruparInternacionais(lista) {
       const nacionais = [];
@@ -529,6 +565,7 @@
           }
 
           if (resJson.sucesso) {
+            tocarSomSucesso(); // Toca o sonzinho fofo de sucesso! 🎵
             statusDiv.className = "mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 block";
             statusDiv.innerHTML = `✅ Comprovante enviado com sucesso!`;
             fileInput.value = "";
