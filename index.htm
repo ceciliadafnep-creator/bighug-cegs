@@ -200,33 +200,34 @@
         </div>
       </div>
 
-      <!-- ÁREA DE ANEXAR E ENVIAR COMPROVANTE -->
+      <!-- ÁREA DE ANEXAR COMPROVANTE (ESTICADA) -->
       <div class="bg-purple-50/70 border border-purple-200 rounded-2xl p-3.5 mb-3 shrink-0">
         <p class="text-xs font-bold text-purple-900 mb-1 flex items-center gap-1.5">
           <span>📎</span> 2. Anexar Comprovante (JPG, PNG ou PDF):
         </p>
-        <p class="text-[11px] text-slate-500 mb-2.5">Marque os itens pagos na lista acima, selecione o arquivo do comprovante e clique em enviar direto para o sistema!</p>
+        <p class="text-[11px] text-slate-500 mb-2.5">Marque os itens pagos na lista acima, selecione o arquivo do comprovante e clique em confirmar pagamento abaixo!</p>
         
-        <div class="flex flex-col sm:flex-row items-center gap-2">
-          <input 
-            type="file" 
-            id="inputArquivoComprovante" 
-            accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf"
-            class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 file:cursor-pointer bg-white rounded-xl border border-purple-200 p-1"
-          >
-          <button 
-            id="btnEnviarComprovante"
-            onclick="enviarComprovanteDrive()" 
-            class="w-full sm:w-auto bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs px-5 py-2.5 rounded-xl transition cursor-pointer shrink-0 shadow-sm">
-            📤 Enviar Comprovante
-          </button>
-        </div>
+        <input 
+          type="file" 
+          id="inputArquivoComprovante" 
+          accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf"
+          class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 file:cursor-pointer bg-white rounded-xl border border-purple-200 p-1"
+        >
         <div id="statusEnvioComprovante" class="hidden mt-2 text-xs font-bold text-center py-1.5 px-3 rounded-xl"></div>
       </div>
 
-      <button onclick="fecharModalPagamento()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl transition cursor-pointer text-sm shrink-0">
-        Fechar
-      </button>
+      <!-- BOTÕES DO RODAPÉ (LADO A LADO) -->
+      <div class="grid grid-cols-2 gap-2 shrink-0">
+        <button onclick="fecharModalPagamento()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl transition cursor-pointer text-xs">
+          Cancelar
+        </button>
+        <button 
+          id="btnEnviarComprovante"
+          onclick="enviarComprovanteDrive()" 
+          class="w-full bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold py-2.5 rounded-xl transition cursor-pointer text-xs shadow-sm">
+          ✨ Confirmar Pagamento
+        </button>
+      </div>
     </div>
   </div>
 
@@ -540,7 +541,7 @@
           statusDiv.textContent = "❌ Erro ao enviar." + err.message;
         } finally {
           btn.disabled = false;
-          btn.textContent = "📤 Enviar Comprovante";
+          btn.textContent = "✨ Confirmar Pagamento";
         }
       };
       reader.readAsDataURL(arquivo);
