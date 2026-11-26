@@ -780,7 +780,7 @@
         } else if (item.statusEnvio === "solicitado") {
           miniBadgeEnvio = `<span class="bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">💛 Envio Solicitado</span>`;
         } else if (item.statusEnvio === "solicitar") {
-          miniBadgeEnvio = `<button onclick="event.stopPropagation(); abrirModalEnvio()" title="Clique para solicitar envio" class="bg-rose-100 hover:bg-rose-200 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce cursor-pointer transition">🚨 Solicitar Envio!</button>`;
+          miniBadgeEnvio = `<span class="bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full animate-bounce">🚨 Solicitar Envio!</span>`;
         }
 
         let bannerEnvioHTML = "";
@@ -800,12 +800,9 @@
           const limiteTexto = item.prazoEnvio ? `até a data limite (<strong>${item.prazoEnvio}</strong>)` : `até a data limite`;
           const chegadaTexto = item.dataChegada ? ` (chegou em ${item.dataChegada})` : "";
           bannerEnvioHTML = `
-            <div onclick="abrirModalEnvio()" title="Clique para solicitar envio" class="mb-3 bg-rose-50 hover:bg-rose-100/80 border border-rose-200 hover:border-rose-300 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 cursor-pointer transition">
-              <div class="flex items-center gap-2">
-                <span class="text-base">🚨</span>
-                <span><strong>A CEG chegou na GOM${chegadaTexto}!</strong> Solicitar envio ${limiteTexto}.</span>
-              </div>
-              <span class="text-[11px] font-bold text-rose-500 shrink-0 underline">Solicitar ↗</span>
+            <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <span class="text-base">🚨</span>
+              <span><strong>A CEG chegou na GOM${chegadaTexto}!</strong> Solicitar envio ${limiteTexto}.</span>
             </div>`;
         }
 
