@@ -148,6 +148,13 @@
         </div>
         <button onclick="alternarTodosCards()" id="btnExpandirTodos" class="text-xs font-bold text-rose-400 hover:text-rose-600 px-2.5 py-1 transition cursor-pointer">↕ Expandir todos</button>
       </div>
+
+      <!-- AVISO CLICÁVEL NA ABA "NA GOM" -->
+      <div id="bannerSolicitarNaGom" onclick="abrirModalEnvio()" class="hidden bg-rose-50/90 hover:bg-rose-100/90 border border-rose-200 hover:border-rose-300 text-rose-600 px-4 py-3 rounded-2xl text-xs md:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer transition shadow-xs hover:scale-[1.01] card-anim">
+        <span>📦</span>
+        <span>Clique aqui para solicitar envio dos seus itens</span>
+        <span class="underline">↗</span>
+      </div>
     </div>
 
     <div id="resultados" class="space-y-4"></div>
@@ -347,11 +354,13 @@
       const resultadosDiv = document.getElementById("resultados");
       const loading = document.getElementById("loading");
       const painelResumo = document.getElementById("painelResumo");
+      const bannerNaGom = document.getElementById("bannerSolicitarNaGom");
 
       if (!input) return;
 
       resultadosDiv.innerHTML = "";
       painelResumo.classList.add("hidden");
+      if (bannerNaGom) bannerNaGom.classList.add("hidden");
       loading.classList.remove("hidden");
 
       try {
@@ -667,6 +676,15 @@
         filtrados = cacheDados.filter(i => i.statusEnvio === "solicitar" || i.statusEnvio === "solicitado");
       } else if (filtro === "recebidos") {
         filtrados = cacheDados.filter(i => i.statusEnvio === "recebido");
+      }
+
+      const bannerNaGom = document.getElementById("bannerSolicitarNaGom");
+      if (bannerNaGom) {
+        if (filtro === "nagom" && filtrados.length > 0) {
+          bannerNaGom.classList.remove("hidden");
+        } else {
+          bannerNaGom.classList.add("hidden");
+        }
       }
 
       renderizarCards(filtrados);
